@@ -1,0 +1,31 @@
+﻿@using LRS.Mvc.Classes
+@model List<LRS.Business.CountryObject>
+@{
+    ViewBag.Title = "Countries";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <div class="pull-left">@ViewBag.Title</div>
+                <div class="pull-right">
+                    <a href="@Url.Action("EditCountry")" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i></a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="panel-body panel-grid">
+            @(Html.Talon().Grid(Model).Name("CountryTable").Columns(c =>
+                      {
+                          c.Bound(x => x.CountryId).Hidden();
+                          c.Bound(x => x.Country).Order().Title("Country Name").Href(Url.Action("EditCountry", "Lookup", new { id = "{CountryId}" }));
+                          c.Bound(x => x.CountryCode).Title("Country Code");
+                          c.Bound(x => x.Active).Width(100);
+                      }))
+        </div>
+    </div>
+</div>

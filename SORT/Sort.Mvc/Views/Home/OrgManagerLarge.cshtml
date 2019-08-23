@@ -1,0 +1,93 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.HomeModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@Html.Hidden("FailMessage", TempData["FailMessage"])
+
+<style>
+    #ViewMode, #OrgOption {
+        height: 25px !important;
+        line-height: 25px !important;
+        padding: 0;
+        width: 300px;
+    }
+</style>
+
+<div class="col-lg-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="pull-left">
+                <h3 class="panel-title">Artifacts </h3>
+            </div>
+            @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { id = "mainForm" }))
+            {
+                @Html.HiddenFor(m => m.ShowPublished)
+                <div class="pull-left col-md-4">
+                    @Html.BsDropDownListFor(x => x.ViewMode, Model.ViewModes(), new { onchange = "this.form.submit();" })
+                </div>
+                <div class="clearfix"></div>
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div style="font-size: 1em; padding-left: 15px;">
+                                    <label class="radio-inline">@Html.RadioButtonFor(m => m.OrgMode, 1, new {onchange = "this.form.submit();"}) My Artifacts</label>
+                                    <label class="radio-inline">@Html.RadioButtonFor(m => m.OrgMode, 2, new {onchange = "this.form.submit();"}) My Org Artifacts</label>
+                                    
+                                </div>
+                                @if (Model.OrgMode == (int) OrgOptionEnum.OrgArtifacts)
+                                {
+                                    <div class="col-md-8 row" style="position: absolute; left: 255px; top: 11px;">
+                                        <div class="pull-left" style="padding-right: 10px;" >Organization:</div>
+                                        <div class="pull-left">@Html.BsDropDownListFor(m => m.OrgOption, Model.UserOrgs, "All", new {onchange = "this.form.submit();"})</div>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                }
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="panel-body text-center">
+            <div class="panel-body">
+                @(Html.Talon().Grid<SortMainObject>().Name("SortTable").Columns(c =>
+                {
+                    c.Bound(x => x.SortMainId).Hidden();
+                    c.Bound(x => x.TitleStr).Width(175).Title("STI Number and Rev");
+                    c.Bound(x => x.PublishTitle).Title("Title");
+                    c.Bound(x => x.OwnerName).Title("Owner");
+                    c.Bound(x => x.ReviewStatus).Title("Review Status");
+                    if (Model.ViewMode == ViewModeOptionEnum.CompletedNeedsPublished)
+                    {
+                        c.Bound(x => x.DelayToDateStr).Title("Delay To Date");
+                    }
+                    else
+                    {
+                        c.Bound(x => x.ReviewProgressStr).Title("Review Progress");
+                        c.Bound(x => x.DueDateStr).Title("Due Date");
+                    }
+                    c.Bound(x => x.GridButtons).Title(" ").Width(90).AlignCenter();
+                }).AjaxSource(Url.Action("HomGridData", "Home", new { viewMode = Model.ViewMode }))
+                )
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var stab = $('#FailMessage').val();
+        if (stab != '') {
+            alert(stab);
+        }
+    });
+
+    function setViewMode(mode) {
+        $('#ViewMode').val(mode).trigger("change");
+    }
+</script>

@@ -1,0 +1,792 @@
+﻿@using LRS.Business
+@using LRS.EmployeeHelper
+@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.ArtifactModel
+@{
+    ViewBag.Title = "Artifact " + Model.Main.StiNumber;
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+
+@Html.HiddenFor(m => m.MainId)
+@Html.HiddenFor(m => m.ReviewId)
+@Html.HiddenFor(m => m.OwnerName)
+
+<div class="col-md-12">
+    <a href="@Url.Action("Index", "Home")" class="btn btn-link"><i class="fa fa-long-arrow-left"></i> Home</a>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><b>@Model.Main.StiNumber:</b> @Model.Main.Title</h3>
+        </div>
+        <div class="panel-body">
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.StiNumber)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.StiNumber, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+            </div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Revision)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.RevisionStr, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+            </div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.OwnerName)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.OwnerName, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+            </div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Status)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.StatusDisplayName, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "" })</div>
+            </div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.ActivityDate)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.ActivityDateStr, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "" })</div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Main.RelatedSti))
+            {
+                <div class="col-md-12">
+                    @Html.BsLabelFor(m => m.Main.RelatedSti)
+                    <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.RelatedSti, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No Related STI Input" })</div>
+                </div>
+            }
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Title)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.Title, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+            </div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.DocumentType)
+                <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.DocumentTypeStr, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+            </div>
+            <div class="col-md-12">
+                <label class="control-label col-md-2">Artifact Options</label>
+                <div class="col-md-10">
+                    <div class="form-control" readonly="readonly" rows="2" style="height: auto;">
+                        <ul>
+                            @if (Model.Main.ContainsSciInfo)
+                            {
+                                <li>This Artifact contains Scientific or Technical Information.</li>
+                            }
+                            @if (Model.Main.TechDataPublic)
+                            {
+                                <li>The technology, technical data, or software is publicly available, intended to be made publicly available, or unlimited from public release.</li>
+                            }
+                            @if (Model.Main.Ouo3)
+                            {
+                                <li>OUO - FOIA Exemption 3 may apply. Contains export controlled information.</li>
+                            }
+                            @if (Model.Main.Ouo3b)
+                            {
+                                <li>OUO - FOIA Exemption 3 may apply. Information protected by federal laws (CRADA, Export Controlled, Archaeological, etc.).</li>
+                            }
+                            @if (Model.Main.Ouo4)
+                            {
+                                <li>OUO - FOIA Exemption 4 may apply. Contains commercial/proprietary information.</li>
+                            }
+                            @if (Model.Main.Ouo5)
+                            {
+                                <li>OUO - FOIA Exemption 5 may apply. Contains predecisional or privileged information.</li>
+                            }
+                            @if (Model.Main.Ouo6)
+                            {
+                                <li>OUO - FOIA Exemption 6 may apply. Contains PII information</li>
+                            }
+                            @if (Model.Main.Ouo7)
+                            {
+                                <li>OUO - FOIA Exemption 7 may apply as determined by derivative classifier (@Model.Main.Ouo7Name).</li>
+                            }
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            @if (Model.Main.UserHasReadAccess())
+            {
+                <div class="col-md-12">
+                    @Html.BsLabelFor(m => m.Main.Abstract)
+                    <div class="col-md-10">@Html.BsTextAreaFor(m => m.Main.Abstract, new { @readonly = "readonly", @tabindex = "-1", @style = "height: 165px;", @placeholder = "No data available. Waiting for data input from User." })</div>
+                </div>
+            }
+            @switch (Model.Main.DocumentTypeEnum)
+            {
+                case DocumentTypeEnum.Conference:
+                    <div class="col-md-12">
+                        @Html.BsLabelFor(m => m.Main.ConferenceName)
+                        <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.ConferenceName, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                    </div>
+                    if (!string.IsNullOrWhiteSpace(Model.Main.ConferenceLocation))
+                    {
+                        <div class="col-md-12">
+                            @Html.BsLabelFor(m => m.Main.ConferenceLocation)
+                            <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.ConferenceLocation, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                        </div>
+                    }
+                    if (!string.IsNullOrWhiteSpace(Model.Main.ConferenceSponsor))
+                    {
+                        <div class="col-md-12">
+                            @Html.BsLabelFor(m => m.Main.ConferenceSponsor)
+                            <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.ConferenceSponsor, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                        </div>
+                    }
+                    if (Model.Main.ConferenceBeginDate.HasValue)
+                    {
+                        <div class="col-md-12">
+                            @Html.BsLabelFor(m => m.Main.ConferenceBeginDate)
+                            <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.ConferenceBeginDate, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                        </div>
+                    }
+                    if (Model.Main.ConferenceEndDate.HasValue)
+                    {
+                        <div class="col-md-12">
+                            @Html.BsLabelFor(m => m.Main.ConferenceEndDate)
+                            <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.ConferenceEndDate, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                        </div>
+                    }
+                    break;
+                case DocumentTypeEnum.Journal:
+                    <div class="col-md-12">
+                        @Html.BsLabelFor(m => m.Main.JournalName)
+                        <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.JournalName, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                    </div>
+                    break;
+                case DocumentTypeEnum.Limited:
+                    <div class="col-md-12">
+                        @Html.BsLabelFor(m => m.Main.LimitedExp)
+                        <div class="col-md-10">@Html.BsTextBoxFor(m => m.Main.LimitedExp, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                    </div>
+                    break;
+            }
+
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Contacts)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.Main.Contacts).Name("contacts").Columns(c =>
+                                   {
+                                       c.Bound(m => m.ContactId).Hidden();
+                                       c.Bound(m => m.IsValid).Hidden();
+                                       c.Bound(m => m.Name).Sortable(false).Render("ValidationRender");
+                                       c.Bound(m => m.Phone).Title("Phone #");
+                                       c.Bound(m => m.WorkOrg).Title("Org");
+                                       c.Bound(m => m.Location);
+                                       c.Bound(m => m.OrcidId).Title("Orcid ID");
+                                   }).Clean()
+                </div>
+            </div>
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Authors)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.Main.Authors).Name("authors").Columns(c =>
+                                   {
+                                       c.Bound(m => m.AuthorId).Hidden();
+                                       c.Bound(m => m.IsValid).Hidden();
+                                       c.Bound(m => m.Name).Sortable(false).Render("ValidationRender");
+                                       c.Bound(m => m.Affiliation).Sortable(false);
+                                       c.Bound(m => m.OrcidId).Sortable(false);
+                                       c.Bound(m => m.CountryState).Title("Country / State").Sortable(false);
+                                       c.Bound(m => m.IsPrimary).Order(SortDir.desc).Title("Primary").Sortable(false);
+                                   }).Clean()
+                </div>
+            </div>
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Funding)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.Main.Funding).Name("funding").Columns(c =>
+                                   {
+                                       c.Bound(m => m.FundingId).Hidden();
+                                       c.Bound(m => m.IsValid).Hidden();
+                                       c.Bound(m => m.Year).Title("Fiscal Year").Sortable(false).Render("ValidationRender");
+                                       c.Bound(m => m.FundingType).Sortable(false);
+                                       c.Bound(m => m.DetailInfo).Title("Details").Sortable(false);
+                                       c.Bound(m => m.Org).Title("Funding Org").Sortable(false);
+                                       c.Bound(m => m.PercentFmt).Title("Funding Percent").Sortable(false);
+                                       c.Buttons(b =>
+                                       {
+                                           b.Button("ShowFundingInfo").Icon("info").Type("info").Title("Info").ToolTip("Show all the Funding Information");
+                                       }).Width(30).AlignCenter();
+                                   }).Clean()
+                </div>
+            </div>
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.SubjectCategories)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.SubjectCategories).Name("subjects").Columns(c =>
+                                   {
+                                       c.Bound(m => m.MetaDataId).Hidden();
+                                       c.Bound(m => m.MetaDataType).Hidden();
+                                       c.Bound(m => m.Data).Title("Subject").Sortable(false);
+                                   }).Clean()
+                </div>
+            </div>
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.CoreCapabilities)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.CoreCapabilities).Name("corecapabilities").Columns(c =>
+                    {
+                        c.Bound(m => m.MetaDataId).Hidden();
+                        c.Bound(m => m.MetaDataType).Hidden();
+                        c.Bound(m => m.Data).Title("Core Capability").Sortable(false);
+                    }).Clean()
+                </div>
+            </div>
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.KeywordList)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.KeywordList).Name("keywords").Columns(c =>
+                                   {
+                                       c.Bound(m => m.MetaDataId).Hidden();
+                                       c.Bound(m => m.MetaDataType).Hidden();
+                                       c.Bound(m => m.Data).Title("Keyword").Sortable(false);
+                                   }).Clean()
+                </div>
+            </div>
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Intellectuals)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.Intellectuals).Name("intellectuals").Columns(c =>
+                                   {
+                                       c.Bound(m => m.IntellectualPropertyId).Hidden();
+                                       c.Bound(m => m.MainId).Hidden();
+                                       c.Bound(m => m.IdrNumber).Title("IDR Number").Sortable(false);
+                                       c.Bound(m => m.DocketNumber).Title("Docket Number").Sortable(false);
+                                       c.Bound(m => m.Aty).Title("Aty").Sortable(false);
+                                       c.Bound(m => m.Ae).Title("Ae").Sortable(false);
+                                       c.Bound(m => m.Title).Title("Title").Sortable(false);
+                                   }).Clean()
+                </div>
+            </div>
+            @if (Model.Main.UserHasReadAccess())
+            {
+                <div class="col-md-12" style="min-height: 10px;"></div>
+                <div class="col-md-12">
+                    @Html.BsLabelFor(m => m.Attachments)
+                    <div class="col-md-10">
+                        @Html.Talon().Grid(Model.Attachments).Name("attachments").Columns(c =>
+                        {
+                            c.Bound(m => m.AttachmentId).Hidden();
+                            c.Bound(m => m.MainId).Hidden();
+                            c.Bound(m => m.FileName).Title("File Name").Sortable(false);
+                            c.Bound(m => m.Note).Title("Comments/Description").Sortable(false);
+                            c.Bound(m => m.Size).Title("File Size").Sortable(false);
+                            c.Bound(m => m.NumberPages).Title("# Pages").Sortable(false);
+                            c.Bound(m => m.UploadDate).Title("Time Attached").Sortable(false);
+                            c.Buttons(b =>
+                            {
+                                b.Button().Icon("download").Type("primary").ToolTip("Download Attachment").Title("Download").Href(Url.Action("DownloadAttachment", "Artifact", new {id = "{AttachmentId}"}));
+                            }).Width(30).AlignCenter();
+                        }).Clean()
+                    </div>
+                </div>
+            }
+            <div class="col-md-12" style="min-height: 10px;"></div>
+            <div class="col-md-12">
+                @Html.BsLabelFor(m => m.Main.Reviewers)
+                <div class="col-md-10">
+                    @Html.Talon().Grid(Model.Main.Reviewers).Name("reviews").Columns(c =>
+                              {
+                                  c.Bound(m => m.ReviewId).Hidden();
+                                  c.Bound(m => m.ReviewerName).Title("Name").Sortable(false);
+                                  c.Bound(m => m.ReviewerTypeDisplayName).Title("Type").Sortable(false);
+                                  c.Bound(m => m.ReviewDate).Title("Date Reviewed").Sortable(false).Format("MM/dd/yyyy");
+                                  c.Bound(m => m.ReviewStatusTxt).Title("Status").Sortable(false).Render("ReviewStatusRender");
+                                  c.Bound(m => m.StatusDate).Title("Status Date").Sortable(false).Format("MM/dd/yyyy");
+                                  if (Model.Main.Reviewers.Exists(n => !string.IsNullOrWhiteSpace(n.IndexButtons)))
+                                  {
+                                      c.Bound(m => m.IndexButtons).Title(" ").Sortable(false).Width(20);
+                                  }
+                                  if (Model.Main.Reviewers.Exists(n => !string.IsNullOrWhiteSpace(n.CommentsTable)))
+                                  {
+                                      c.Bound(m => m.CommentsTable).Title("Comments").Sortable(false);
+                                  }
+                              }).Clean()
+                </div>
+            </div>
+            @if (Model.Main.ReviewHistory.Count > 0)
+            {
+                <div class="col-md-12" style="min-height: 10px;"></div>
+                <div class="col-md-12">
+                    @Html.BsLabelFor(m => m.Main.ReviewHistory)
+                    <div class="col-md-10">
+                        @Html.Partial("Partials/_reviewHistoryList", Model.Main.ReviewHistory)
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (Model.ShowAdminControls)
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Admin/Special Reviewer Section</h3>
+            </div>
+            <div class="panel-body">
+                <div class="row text-nowrap">
+                    <label class="control-label col-md-2" for="Comments">Comments (Only Admin and Special Reviewers can see these)</label>
+                </div>
+                <div class="row" id="AdminCommentsPartial">
+                    @Html.Action("AdminCommentsPartial", "Artifact", new { id = Model.MainId })
+                </div>
+
+                <div class="row text-nowrap">
+                    <label class="control-label col-md-2" for="Attachments">Attachments (Only Admin and Special Reviewers can see these)</label>
+                </div>
+                <div class="row" id="AdminAttachmentPartial">
+                    @Html.Action("AdminAttachmentsPartial", "Artifact", new { id = Model.MainId })
+                </div>
+            </div>
+        </div>
+
+        @Html.Action("AddAdminCommentsPartial", "Artifact", new { id = Model.MainId })
+        @Html.Action("AddAdminAttachmentsPartial", "Artifact", new { id = Model.MainId })
+    }
+
+    <div class="panel panel-primary">
+        <div class="panel-body">
+            @if (Model.IsActiveReviewer)
+            {
+                if (Model.ReviewerType.HasValue)
+                {
+                    if (Model.ReviewerType == ReviewerTypeEnum.Classification)
+                    {
+                        <div class="col-md-12">
+                            <div class="panel-group">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        @Html.HiddenFor(m => m.Ouo7)
+                                        <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo7Yes" onclick="SetYesNo('Ouo7', true);" type="button" class="btn btn-xs">Yes</button></div>
+                                        <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo7No" onclick="SetYesNo('Ouo7', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                                        <div class="pull-left">OUO – FOIA exemption 7</div>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                </div>
+                                <div id="Ouo7Div" class="row" hidden="hidden">
+                                    <div class="pull-left text-nowrap">@Html.BsLabelFor(m => m.Ouo7EmployeeId, new { @class = "col-md-3" })</div>
+                                    <div class="pull-left" style="width: 400px;">@Html.EmployeeFor(m => m.Ouo7EmployeeId, Url.Action("SearchEmployees", "lookup"))</div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.ReviewerType == ReviewerTypeEnum.ExportControl)
+                    {
+                        <div class="col-md-12">
+                            <div class="panel-group">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        @Html.HiddenFor(m => m.Ouo3)
+                                        <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo3Yes" onclick="SetYesNo('Ouo3', true);" type="button" class="btn btn-xs">Yes</button></div>
+                                        <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo3No" onclick="SetYesNo('Ouo3', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                                        <div class="pull-left;">OUO – FOIA exemption 3</div>
+                                        <div class="clearfix"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+            <div class="col-md-12">
+                <div class="pull-left">
+                    <a href="@Url.Action("Index", "Home")" title="Home" class="btn btn-sm btn-default"><i class="fa fa-home"></i> Home</a>
+                    @if (!string.IsNullOrWhiteSpace(Model.SortUrl))
+                    {
+                        <a href="@Model.SortUrl" target="_blank" title="View in SORT" class="btn btn-sm btn-success"><i class="fa fa-globe"></i> Open in SORT</a>
+                    }
+                    @if (Model.ParentId.HasValue)
+                    {
+                        <a href="@Url.Action("Index", new {id = Model.ParentId})" title="Finish the Peer Review" class="btn btn-sm btn-default"><i class="fa fa-backward"></i> Previous Revision</a>
+                    }
+                    @if (Model.ChildId.HasValue)
+                    {
+                        <a href="@Url.Action("Index", new {id = Model.ChildId})" title="Finish the Peer Review" class="btn btn-sm btn-default"><i class="fa fa-forward"></i> Next Revision</a>
+                    }
+                    @if (Model.IsActiveReviewer)
+                    {
+                        if (Model.ReviewerType.HasValue)
+                        {
+                            if (Model.ReviewerType == ReviewerTypeEnum.PeerTechnical)
+                            {
+                                <a onclick="FinishReview();" title="Finish the Peer Review" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Finish Review</a>
+                                <a onclick="DeclineToReview();" title="Respond that you will not be doing the Peer Review" class="btn btn-sm btn-danger"><i class="fa fa-exclamation"></i> Will not be Reviewing</a>
+                                <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#dvAddComment" title="Add a Review Comment to the Artifact"><i class="fa fa-comment"> Add Comment</i></button>
+                            }
+                            else
+                            {
+                                <a onclick="ApprovedReview();" title="Approved the Artifact" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Approved Artifact</a>
+                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal" data-target="#dvReject" title="Reject the Artifact"><i class="fa fa-check"> Reject Artifact</i></button>
+                                <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#dvAddComment" title="Add a Review Comment to the Artifact"><i class="fa fa-comment"> Add Review Comment</i></button>
+                            }
+                        }
+
+                    }
+                    else if (Model.Main.UserHasWriteAccess())
+                    {
+                        switch (Model.Main.StatusEnum)
+                        {
+                            case StatusEnum.Cancelled:
+                                <a onclick="RetartArtifact();" title="Finish the Peer Review" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Restart Artifact</a>
+                                break;
+                            case StatusEnum.Rejected:
+                                <a onclick="RetartArtifact();" title="Finish the Peer Review" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Restart Artifact</a>
+                                <a onclick="CancelArtifact();" title="Cancel Artifact" class="btn btn-sm btn-danger"><i class="fa fa-exclamation"></i> Cancel Artifact</a>
+                                break;
+                            case StatusEnum.InReview:
+                                <a onclick="CancelArtifact();" title="Cancel Review" class="btn btn-sm btn-danger"><i class="fa fa-exclamation"></i> Cancel Artifact</a>
+                                break;
+                            case StatusEnum.Completed:
+                                if (!Model.Main.ChildId.HasValue)
+                                {
+                                    <a onclick="RevisionArtifact();" title="Create a Revision of the Artifact" class="btn btn-sm btn-primary"><i class="fa fa-recycle"></i> Create Revision</a>
+                                }
+                                if (Model.Main.DocumentTypeEnum == DocumentTypeEnum.Conference && !Model.ChildId.HasValue)
+                                {
+                                    <a onclick="FollowOnArtifact();" title="Follow On with Conference Artifact" class="btn btn-sm btn-default"><i class="fa fa-pencil-square"></i> Follow On</a>
+                                }
+                                if (Model.Main.NeedSentToSort)
+                                {
+                                    <a onclick="ExportArtifactToSort();" title="Export the Artifact to SORT" class="btn btn-sm btn-success"><i class="fa fa-cloud-upload"></i> Export Artifact to SORT</a>
+                                }
+                                break;
+                        }
+                    }
+                </div>
+                @if (Current.IsReleaseOfficer)
+                {
+                    <div class="pull-right">
+                        <div class="btn-group btn-group-sm">
+                            <input name="button" type="button" value="Admin Control" class="btn btn-warning btn-sm" />
+                            <button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><button type="button" onclick="location.href = '@Url.Action("Edit", new {id = Model.MainId})'" style="width: 100%;" class="btn btn-sm btn-warning">Edit Artifact</button></li>
+                                <li><input name="button" type="button" onclick="CancelArtifact();" value="Cancel Artifact" style="width: 100%;" class="btn btn-sm btn-warning" /></li>
+                                @if (Current.IsAdmin)
+                                {
+                                    <li><button type="button" onclick="location.href = '@Url.Action("Delete", new {id = Model.MainId})'" style="width: 100%;" class="btn btn-sm btn-danger">Delete Artifact</button></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Action("AddReviewCommentPartial", "Artifact", new { id = Model.MainId, rid = Model.ReviewId })
+@Html.Action("MarkReviewRejectedPartial", "Artifact", new { id = Model.MainId, rid = Model.ReviewId })
+
+@*NOTE: Used for loading the Funding Info partial*@
+<div id="FundingInfo">
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('td.dataTables_empty').each(function () {
+            $(this).text('No data available. Waiting for data input from User.');
+        });
+
+        SetYesNo('Ouo3', $('#Ouo3').val());
+        SetYesNo('Ouo7', $('#Ouo7').val());
+    });
+
+    function SetYesNo(data, value) {
+        switch (data) {
+            case 'Ouo3':
+                $('#Ouo3').val(value);
+                $('#btnOuo3Yes').removeClass('btn-warning');
+                $('#btnOuo3No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo3Yes').addClass('btn-warning');
+                } else {
+                    $('#btnOuo3No').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo7':
+                $('#Ouo7').val(value);
+                $('#btnOuo7Yes').removeClass('btn-warning');
+                $('#btnOuo7No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo7Yes').addClass('btn-warning');
+                    $('#Ouo7Div').show();
+                } else {
+                    $('#btnOuo7No').addClass('btn-warning');
+                    $('#Ouo7Div').hide();
+                }
+                break;
+        }
+    }
+
+    function FireButton(el, method) {
+        var tr = $(el).closest('tr');
+        var tb = $(el).closest('table').data('datatable');
+        var d = tb.row(tr).data();
+        method.call(el, d);
+    }
+
+    function SendReminder(row) {
+        var name = row['ReviewerName'];
+        if (name == null || name == '') {
+            name = row['ReviewerTypeDisplayName'] + ' Reviewers';
+        }
+
+        BootstrapDialog.show({
+            title: 'Send Reminder',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Are you sure you wish to send an email reminder to ' + name,
+            closable: false,
+            buttons: [{
+                label: 'Yes',
+                id: 'btnYes1',
+                cssClass: 'btn-primary',
+                action: function (dialogRef) {
+                    // Yes was clicked, so hid the buttons, and display that we are publishing
+                    var $closebutton = dialogRef.getButton('btnNo1');
+                    $closebutton.hide();
+                    var $mainbutton = dialogRef.getButton('btnYes1');
+                    $mainbutton.hide();
+                    dialogRef.getModalBody().html('Sending Email. Please Wait...');
+                    // Make an ajax call to send the reminder email
+                    $.post("/Artifact/SendReminderEmail",
+                        {
+                            id: row["ReviewId"]
+                        },
+                        function (data) {
+                            // Display the results of the send
+                            if (data == null) {
+                                dialogRef.getModalBody().html('<p style="color: Red;">Email Failed</p>');
+                            } else {
+                                dialogRef.getModalBody().html('<p styel="color: Green;">Email was successfully Sent</p>');
+                            }
+                            // 5 second delay to close dialog
+                            setTimeout(function () { window.location.reload(true); }, 5000);
+                        }).fail(function (xhr, status, error) {
+                            dialogRef.getModalBody().html('<p style="color: Red;">Email Failed</p><p>Error: ' + error + '</p>');
+                            setTimeout(function () { dialogRef.close(); }, 5000);
+                        });
+                }
+            }, {
+                // No was clicked, so close this dialog
+                label: 'No',
+                id: 'btnNo1',
+                cssClass: 'btn-default',
+                action: function (dialogRef) {
+                    dialogRef.close();
+                }
+            }]
+        });
+    }
+
+    function ShowFundingInfo(row) {
+        $.post("/Artifact/GetFundingInfoPartial",
+            {
+                id: row['FundingId']
+            },
+            function (data) {
+                $("#FundingInfo").html(data);
+                $('#dvFundingInfo').modal('show');
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+
+    function ValidationRender(data, type, row) {
+        if (row["IsValid"] == "True") {
+            return data;
+        } else {
+            return "<i style=\"Color:Red;\">(Invalid) </i>" + data;
+        }
+    }
+
+    function ReviewStatusRender(data, type, row) {
+        if (data == "Complete" ||
+            data == "Approved") {
+            return '<div style="color: green;">' + data + '</div>';
+        } else if (data == 'Rejected' ||
+            data == 'NotReviewing') {
+            return '<div style="color: red;">' + data + '</div>';
+        }
+
+        return data;
+    }
+
+    function FinishReview() {
+        $.confirm({
+            title: 'Finish Review',
+            content: 'Are you sure you wish to Finish the review of this Artifact?',
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/MarkReviewFinished/" + $('#MainId').val() + '?rid=' + $('#ReviewId').val();
+            }
+        });
+    }
+
+    function ApprovedReview() {
+        $.confirm({
+            title: 'Approve Artifact',
+            content: 'Are you sure you wish to Approve this Artifact and finish the review?',
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/MarkReviewApproved/" + $('#MainId').val() + '?rid=' + $('#ReviewId').val() + '&ouo3=' + $('#Ouo3').val() + '&ouo7=' + $('#Ouo7').val() + '&ouo7sn=' + $('#Ouo7EmployeeId').val();
+            }
+        });
+    }
+
+    function DeclineToReview() {
+        $.confirm({
+            title: 'Decline to review Artifact',
+            content: 'Are you sure you wish to decline to be a reviewer for this Artifact?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/MarkNotReviewing/" + $('#MainId').val() + '?rid=' + $('#ReviewId').val();
+            }
+        });
+    }
+
+    function RetartArtifact() {
+        $.confirm({
+            title: 'Restart Artifact',
+            content: 'Are you sure you wish to Restart this Artifact and set it back to New state?',
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/Restart/" + $('#MainId').val();
+            }
+        });
+    }
+
+    function CancelArtifact() {
+        $.confirm({
+            title: 'Cancel Artifact',
+            content: 'Are you sure you wish to Cancel this Artifact and cancel all Reviews? You can restart the Artifact to work on it more.',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/Cancel/" + $('#MainId').val();
+            }
+        });
+    }
+
+    function EditComment(id) {
+        $.post("/Artifact/GetReviewComment",
+            {
+                id: id
+            },
+            function (data) {
+                $("#CommentId").val(data.id);
+                $('#CommentReviewId').val(data.reviewId);
+                $("#Comment").val(data.comment);
+                $('#dvAddComment').modal('show');
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+
+    function DeleteComment(id) {
+        $.confirm({
+            title: 'Delete Comment',
+            content: 'Are you sure you wish to delete this comment? Warning: This can not be undone.',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/DeleteComment/" + id;
+            }
+        });
+    }
+
+    function RevisionArtifact() {
+        $.confirm({
+            title: 'Create Revision',
+            content: 'Are you sure you wish to create a new revision of this artifact?',
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/CreateRevision/" + $('#MainId').val();
+            }
+        });
+    }
+
+    function FollowOnArtifact() {
+        $.confirm({
+            title: 'Follow On',
+            content: 'Are you sure you wish Follow On with this Conference artifact?',
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Artifact/FollowOn/" + $('#MainId').val();
+            }
+        });
+    }
+
+    function ExportArtifactToSort() {
+        $.post("/Artifact/ExportArtifactToSort/",
+            {
+                id: $('#MainId').val()
+            },
+            function (data) {
+                if (data != null && data != '') {
+                    if (data.Status == true || data.Status == 'true' || data.Status == 'True') {
+                        alert("Artifact was successfully exported to SORT.");
+                    } else if (data.Message != '') {
+                        alert("Server returned an error: " + data.Message);
+                    } else {
+                        alert("Unable to complete request.  Server returned an error.");
+                    }
+                } else {
+                    alert("Unable to complete request.  Server returned an error.");
+                }
+                location.reload(true);
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+
+    function LoadAdminAttachmentsPartial(mainId) {
+        $.ajax({
+            type: "GET",
+            url: "/Artifact/AdminAttachmentsPartial",
+            data: {
+                id: mainId
+            },
+            success: function (data) {
+                $("#AdminAttachmentPartial").html(data);
+                $("#AttachmentsAreaGrid").collapse("show");
+            }
+        });
+    }
+
+    function LoadAdminCommentsPartial(mainId) {
+        $.ajax({
+            type: "GET",
+            url: "/Artifact/AdminCommentsPartial",
+            data: {
+                id: mainId
+            },
+            success: function (data) {
+                $("#AdminCommentsPartial").html(data);
+                $("#CommentsAreaGrid").collapse("show");
+            }
+        });
+    }
+    
+</script>

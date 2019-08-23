@@ -1,0 +1,86 @@
+﻿@using LRS.Business
+@model LRS.Mvc.Models.AdminAttachmentModel
+
+<div class="col-md-12" id="AttachmentArea">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <div class="pull-left">
+                    <a id="btnExpandAttachment" href="#AttachmentsAreaGrid" title="Show/Hide Attachments" data-toggle="collapse" style="font-size:1.25em; color:blue;">
+                        <i class="fa fa-arrow-down"></i>
+                    </a>
+                </div>
+                <div class="pull-left">
+                    <a href="#AttachmentsAreaGrid" data-toggle="collapse" style="color: darkblue; text-decoration: none;">
+                        <span class="badge" style="background-color: #93C54B;">@Model.Attachments.Count</span>
+                    </a>
+                </div>
+                <div class="pull-right">
+                    <button type="button" value="@Model.MainId" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#dvAddAttachments"><i class="fa fa-plus"> Add Attachment</i></button>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div id="AttachmentsAreaGrid" class="panel-collapse collapse">
+            <div class="panel-body panel-grid">
+                @(Html.Talon().Grid(Model.Attachments).Name("Attachments").Columns(c =>
+                {
+                    c.Bound(m => m.MainId).Hidden();
+                    c.Bound(m => m.AttachmentId).Hidden();
+                    c.Bound(m => m.FileName).Title("File Name");
+                    c.Bound(m => m.Note).Title("Comments/Description");
+                    c.Bound(m => m.Size).Title("File Size");
+                    c.Bound(m => m.AddedByUserName).Title("Added By");
+                    c.Bound(m => m.UploadDate).Order().Title("Time Added");
+                    c.Buttons(b =>
+                    {
+                        b.Button().Icon("download").Type("primary").Title("Download").ToolTip("Download Attachment").Href(Url.Action("DownloadAttachment", "Artifact", new { id = "{AttachmentId}"}));
+                        b.Button("DeleteAdminAttachment").Icon("times").Type("danger").Title("Remove").ToolTip("Remove Attachment");
+                    }).Width(185).AlignCenter().NoWrap();
+                }))
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#AttachmentsAreaGrid").on("hide.bs.collapse", function () {
+            $("#btnExpandAttachment").html('<i class="fa fa-arrow-down"></i>');
+        });
+        $("#AttachmentsAreaGrid").on("show.bs.collapse", function () {
+            $("#btnExpandAttachment").html('<i class="fa fa-arrow-up"></i>');
+        });
+    });
+
+    function FireButton(el, method) {
+        var tr = $(el).closest('tr');
+        var tb = $(el).closest('table').data('datatable');
+        var d = tb.row(tr).data();
+        method.call(el, d);
+    }
+
+    function DeleteAdminAttachment(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Delete Attachment',
+            content: 'Are you sure you wish to delete this Attachment?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-info',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $.post("/Artifact/DeleteAttachment",
+                    {
+                        id: row['AttachmentId'],
+                        am: true
+                    },
+                    function (data) {
+                        if ($.isFunction(window.LoadAdminAttachmentsPartial)) {
+                            window.LoadAdminAttachmentsPartial(row["MainId"]);
+                        }
+                    });
+            }
+        });
+    }
+</script>

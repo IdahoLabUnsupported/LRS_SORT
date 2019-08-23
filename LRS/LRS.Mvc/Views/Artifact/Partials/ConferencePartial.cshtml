@@ -1,0 +1,115 @@
+﻿@using LRS.Business
+@model MainObject
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Conference/Event Paper, Proceedings, or Presentation</b></p>
+    <p>Conference materials may disclose information that may be patentable or copyrightable. Dates that materials are distributed could determine deadlines for patents and foreign rights.</p>
+    <p>If you are requested to complete a copyright transfer form, Please contact Chris Kowalczyk (526-9047)</p>
+</div>
+
+@using (Html.BeginForm("ConferenceSave", "Artifact", FormMethod.Post, new { id = "ConferenceForm", @onsubmit = "return false" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MainId)
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.ConferenceName, new { @class = "required col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.ConferenceName, new { @class = "check-required" })
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.ConferenceLocation, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.ConferenceLocation)
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.ConferenceSponsor, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.ConferenceSponsor)
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-6">@Html.BsLabelFor(m => m.ConferenceBeginDate, new { @class = "col-md-3" })</div>
+            <div class="col-md-6">@Html.BsLabelFor(m => m.ConferenceEndDate, new { @class = "col-md-3" })</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                @Html.BsDatePickerFor(m => m.ConferenceBeginDate)
+            </div>
+            <div class="col-md-6">
+                @Html.BsDatePickerFor(m => m.ConferenceEndDate)
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#ConferenceForm .check-required').change(function () {
+            CheckConferenceRequired();
+        });
+
+        $("#ConferenceBeginDate").closest('.input-group').on("dp.change", function (e) {
+            $('#ConferenceEndDate').closest('.input-group').data("DateTimePicker").minDate(e.date);
+            CheckConferenceRequired();
+        });
+
+        $("#ConferenceEndDate").closest('.input-group').on("dp.change", function (e) {
+            $('#ConferenceBeginDate').closest('.input-group').data("DateTimePicker").maxDate(e.date);
+            CheckConferenceRequired();
+        });
+
+        CheckConferenceRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckConferenceRequired() {
+        var requirMeet = true;
+        $('#ConferenceForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#conferenceTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#conferenceTab]').addClass('required');
+        }
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function ConferenceSave() {
+        $('.nav-pills a[href=#conferenceTab]').addClass('saving');
+        var form = $('#ConferenceForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                setTimeout(function () { $('.nav-pills a[href=#conferenceTab]').removeClass('saving'); }, 500);
+            });
+    }
+</script>
+

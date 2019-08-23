@@ -1,0 +1,53 @@
+﻿@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.GenericReviewModel
+@{
+    ViewBag.Title = "Review Generic Email Addresses";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel panel-heading">
+            <h3 class="panel-title">@ViewBag.Title</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.ClassGeneralEmail)
+                    <div class="col-md-10">
+                        @Html.BsTextBoxFor(m => m.ClassGeneralEmail)
+                        @Html.ValidationMessageFor(m => m.ClassGeneralEmail)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.ExportGeneralEmail)
+                    <div class="col-md-10">
+                        @Html.BsTextBoxFor(m => m.ExportGeneralEmail)
+                        @Html.ValidationMessageFor(m => m.ExportGeneralEmail)
+                    </div>
+                </div>
+            
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.TechGeneralEmail)
+                    <div class="col-md-10">
+                        @Html.BsTextBoxFor(m => m.TechGeneralEmail)
+                        @Html.ValidationMessageFor(m => m.TechGeneralEmail)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="@Url.Action("Index")" class="btn btn-default">Cancel</a>
+                    </div>
+                </div>
+            </div>
+
+        }
+    </div>
+</div>

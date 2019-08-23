@@ -1,0 +1,41 @@
+@{ var currentcontroller = HttpContext.Current.Request.RequestContext.RouteData.Values["controller"].ToString(); }
+@foreach (var mi in LRS.Mvc.Classes.Menu.Items)
+{
+    if (mi.UserHasAccess(User))
+    {
+        if (mi.SubMenuItems.Count == 0)
+        {
+            <li class="@mi.LiClass"><a href="@Url.Action(mi.Action, mi.Controller)">@(mi.IconMarkup)@mi.Text</a></li>
+        }
+        else
+        {
+            <li class="dropdown @mi.LiClass">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">@(mi.IconMarkup)@mi.Text <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    @foreach (var smi in mi.SubMenuItems)
+                    {
+                        if (smi.UserHasAccess(User))
+                        {
+                            if (smi.SubMenuItems.Count == 0)
+                            {
+                                <li><a href="@Url.Action(smi.Action, smi.Controller)">@(smi.IconMarkup)@smi.Text</a></li>
+                            }
+                            else
+                            {
+                                <li class="dropdown">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">@(mi.IconMarkup)@mi.Text <span class="caret"></span></a>
+                                    <ul class="dropdown-menu" role="menu">
+                                        @foreach (var ssmi in smi.SubMenuItems)
+                                        {
+                                            <li><a href="@Url.Action(ssmi.Action, ssmi.Controller)">@(ssmi.IconMarkup)@ssmi.Text</a></li>
+                                        }
+                                    </ul>
+                                </li>
+                            }
+                        }
+                    }
+                </ul>
+            </li>
+        }
+    }
+}

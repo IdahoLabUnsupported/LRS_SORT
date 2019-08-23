@@ -1,0 +1,72 @@
+﻿@using Sort.Business
+@model SortMainObject
+    
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Program-Determained Official Use Only info</b></p>
+    <p>Please provide the release date and exemption number.</p>
+</div>
+
+@using (Html.BeginForm("OfficialUseSave", "Artifact", FormMethod.Post, new { id = "OfficialUseForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+
+    <div class="row text-nowrap">
+        <div class="col-md-6">@Html.BsLabelFor(m => m.AccessReleaseDate, new {@class = "required col-md-3"})</div>
+        <div class="col-md-6">@Html.BsLabelFor(m => m.ExemptionNumber, new {@class = "required col-md-3"})</div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            @Html.BsDatePickerFor(m => m.AccessReleaseDate, new { @class = "check-required" }).ClearButton(true).TodayButton(true)
+        </div>
+        <div class="col-md-6">
+            @Html.BsTextBoxFor(m => m.ExemptionNumber, new { @class = "check-required" })
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#OfficialUseForm .check-required').change(function () {
+            CheckOfficialUseRequired();
+        });
+
+        $("#AccessReleaseDate").closest('.input-group').on("dp.change", function (e) {
+            CheckOfficialUseRequired();
+        });
+
+        CheckOfficialUseRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckOfficialUseRequired() {
+        var requirMeet = true;
+        $('#OfficialUseForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#officialUseTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#officialUseTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function OfficialUseSave() {
+        $('.nav-pills a[href=#officialUseTab]').addClass('saving');
+        var form = $('#OfficialUseForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#officialUseTab]').removeClass('saving');
+            });
+    }
+</script>

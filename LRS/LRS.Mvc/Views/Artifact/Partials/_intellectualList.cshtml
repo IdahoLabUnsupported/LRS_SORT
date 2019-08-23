@@ -1,0 +1,19 @@
+﻿@model List<LRS.Business.IntellectualPropertyObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("intellectuals").Columns(c =>
+        {
+            c.Bound(m => m.IntellectualPropertyId).Hidden();
+            c.Bound(m => m.MainId).Hidden();
+            c.Bound(m => m.IdrNumber).Title("IDR Number");
+            c.Bound(m => m.DocketNumber).Title("Docket Number");
+            c.Bound(m => m.Aty).Title("Aty");
+            c.Bound(m => m.Ae).Title("Ae");
+            c.Bound(m => m.Title).Title("Title");
+            c.Buttons(b =>
+            {
+                //b.Button("EditIntellectual").Icon("edit").Type("primary").ToolTip("Edit Intellectual");
+                b.Button("RemoveIntellectual").Icon("times").Type("danger").Title("Remove").ToolTip("Remove Intellectual");
+            }).Width(40).AlignCenter().NoWrap();
+        }).Clean()
+</div>

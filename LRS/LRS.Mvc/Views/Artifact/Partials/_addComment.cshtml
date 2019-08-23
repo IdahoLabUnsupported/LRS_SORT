@@ -1,0 +1,61 @@
+﻿@model LRS.Mvc.Models.CommentModel
+
+<div class="modal fade" id="dvAddComment" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="ClearCommentData()">×</button>
+                <h4 class="modal-title" id="modalTitleAddComment">Add Comment to @Model.StiNumber</h4>
+            </div>
+            @using (Html.BeginForm("AddReviewComment", "Artifact", FormMethod.Post, new { id = "frmComment" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.MainId)
+                @Html.HiddenFor(m => m.CommentId)
+                @Html.HiddenFor(m => m.CommentReviewId)
+                <div class="modal-body">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"></h3>
+                        </div>
+                        <div class="panel-body form-horizontal">
+                            <div class="row text-nowrap">
+                                <div class="col-md-12">
+                                    <label class="control-label col-sm-2" for="Comment"><b style="color:red;">* </b>Comment</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @Html.BsTextAreaFor(m => m.Comment, new { @class = "help" })
+                                    <label id="CommentMsg" hidden><b style="color:red;">Comment is required</b></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="SaveComment();" class="btn btn-sm btn-primary">Save</button>
+                    <button type="button" class="btn btn-sm btn-default" onclick="ClearCommentData()">Cancel</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function SaveComment() {
+        var cmt = $('#Comment').val();
+        if (cmt.trim() == '') {
+            $('#CommentMsg').show();
+        } else {
+            $('#frmComment').submit();
+        }
+    }
+
+    function ClearCommentData() {
+        $('#dvAddComment').modal('hide');
+        $("#CommentMsg").hide();
+        $("#Comment").val('');
+        $('#CommentId').val('');
+    }
+</script>

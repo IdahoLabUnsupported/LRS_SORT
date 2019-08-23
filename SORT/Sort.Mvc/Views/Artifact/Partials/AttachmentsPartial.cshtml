@@ -1,0 +1,287 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.ArtifactModel
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>File Attachments</b></p>
+    <p>Choose the Type of Attachment you are adding, along with a description of what is in the file.  Then choose a file to attach.</p>
+    <p>A Final Document / Accepted Manuscript is required.  Add your Final Document / Accepted Manuscript after all your reviewers have approved it.</p>
+    <p>Accepted Document File Extensions are MS Word (.docx, .doc, .rtf, .txt), MS Excel (.xlsx, .xls, csv, .ods), MS PowerPoint (.ppt, .pptx) or PDF (.pdf)</p>
+</div>
+
+@using (Html.BeginForm("AddAttachment", "Artifact", FormMethod.Post, new { enctype = "multipart/form-data", id = "AttachmentForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.Hidden("Filename")
+    @Html.Hidden("Size")
+    
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-5">@Html.BsLabelFor(m => m.AttachmentType, new { @class = "required col-md-3" })</div>
+                <div class="col-md-7">@Html.BsLabelFor(m => m.AttachmentNote, new { @class = "required col-md-3" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    @Html.BsDropDownListFor(m => m.AttachmentType, BsHelper.GetEnumSelectList<AttachmentTypeEnum>(), "--Select--")
+                    @Html.ValidationMessageFor(m => m.AttachmentType, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-7">
+                    @Html.BsTextAreaFor(m => m.AttachmentNote)
+                    @Html.ValidationMessageFor(m => m.AttachmentNote, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="row text-nowrap">
+                <div class="col-md-12">@Html.BsLabelFor(m => m.File, new { @class = "required col-md-3" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    @Html.BsFileUploadFor(m => m.File, new string[] { "docx", "doc", "rtf", "txt", "xlsx", "xls", "csv", "ods", "ppt", "pptx", "pdf" })
+                    @Html.ValidationMessageFor(m => m.File, "", new { @class = "text-danger" })
+                    @if (TempData["InvalidFile"] != null)
+                    {
+                        <p class="text-danger">@TempData["InvalidFile"]</p>
+                    }
+                </div>
+                       
+            </div>
+            
+            <div class="panel-group">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="progressbar_container" style="width: 100%; height: 30px; position: relative; background-color: grey; display: none">
+                            <div id="progressbar" style="width: 0%; height: 100%; position: absolute; background-color: green"></div>
+                            <span id="progressbar_label" style="position: absolute; left: 49%; top: 20%; color: white;">Uploading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    <button id="addAttachmentBtn" type="button" onclick="AddAttachment();" class="btn btn-sm btn-success" style="margin: 5px;">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="AttachmentPartial">
+    @Html.Partial("Partials/_attachmentList", Model.Attachments)
+</div>
+
+<script>
+    $(document).ready(function() {
+        CheckAttachmentRequired();
+
+        $("#AttachmentForm").submit(function(event) {
+            if (CheckAttachmentRequiredMeet() !== true) {
+                event.preventDefault();
+            }
+        });
+
+        $('#File').change(function(e) {
+            if (e != null && e.target != null) {
+                file = e.target.files[0];
+            }
+        });
+    });
+
+    var file = null;
+
+    function CheckAttachmentRequiredMeet() {
+        var isValid = true;
+
+        if ($('#SortMainId').val() == '' || $('#SortMainId').val() == '0') return false;
+
+        if ($('#AttachmentType').val() == '') {
+            isValid = false;
+            SetValidationMsg('AttachmentType', 'Type is required');
+        } else {
+            if ($('#AttachmentType').val() == 'FinalDoc' &&
+                ($("#attachments tr td:contains('Final Document')").length > 0)) {
+                isValid = false;
+                SetValidationMsg('AttachmentType',
+                    'There can only be one Final Document attached. Delete the old one to replace it.');
+            } else {
+                SetValidationMsg('AttachmentType', '');
+            }
+        }
+
+        if ($('#AttachmentNote').val() == '') {
+            isValid = false;
+            SetValidationMsg('AttachmentNote', 'Description is required');
+        } else {
+            SetValidationMsg('AttachmentNote', '');
+        }
+
+        if ($('#File').val() == '' || file === null) {
+            isValid = false;
+            SetValidationMsg('File', 'File is required');
+        } else {
+            if (file.size > 2048000000) {
+                isValid = false;
+                SetValidationMsg('File', 'File size is to large to upload, Max size is 2GB.');
+            } else {
+                SetValidationMsg('File', '');
+            }
+        }
+
+        return isValid;
+    }
+
+    function RemoveAttachment(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Attachment',
+            content: 'Are you sure you wish to remove this Attachment?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function() {
+                $('.nav-pills a[href=#attachmentsTab]').addClass('saving');
+                $.post("/Artifact/DeleteAttachment",
+                        {
+                            id: row['SortAttachmentId']
+                        },
+                        function(data) {
+                            $("#AttachmentPartial").html(data);
+                            CheckAttachmentRequired();
+                        })
+                    .always(function() { $('.nav-pills a[href=#attachmentsTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function CheckAttachmentRequired() {
+        if ($("#attachments tr td:contains('Final Document')").length > 0) {
+            $('.nav-pills a[href=#attachmentsTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#attachmentsTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function AddAttachment() {
+        if (CheckAttachmentRequiredMeet() === true) {
+            $('#Filename').val(file.name);
+            $('#Size').val(file.size);
+
+            var form = $('#AttachmentForm');
+            $('.nav-pills a[href=#attachmentsTab]').addClass('saving');
+
+            $.post(form.attr('action'),
+                    form.serialize(),
+                    function(data) {
+                        if (data != null && data > 0) {
+                            UploadFile(data);
+                        } else {
+                            alert("Unable to Save the Attachment.  Something went wrong saving the attachment.");
+                        }
+                    })
+                .fail(function(response) {
+                    alert("Unable to Save the Attachment.  Required fields missing or Invalid.");
+                })
+                .always(function() { $('.nav-pills a[href=#attachmentsTab]').removeClass('saving'); });
+        }
+    }
+
+    function ClearAttachmentData() {
+        ClearAllValidationMsgs();
+        file = null;
+        $('#File').val('').trigger('change');
+        $('#Filename').val('');
+        $('#Size').val('');
+        $('#AttachmentNote').val('');
+        $('#addAttachmentBtn').prop("disabled", false);
+    }
+
+    function LoadAttachmentPartial() {
+        $.post("/Artifact/GetAttachments",
+            {
+                id: $("#SortMainId").val()
+            },
+            function (data) {
+                $("#AttachmentPartial").html(data);
+                CheckAttachmentRequired();
+            }).fail(function (response) { if (response.responseText != '') { alert(response.responseText); } });
+    }
+
+    function ClearAllValidationMsgs() {
+        SetValidationMsg('AttachmentType', '');
+        SetValidationMsg('AttachmentNote', '');
+        SetValidationMsg('File', '');
+    }
+
+    // File Upload Region
+    function progressBarStart() {
+        $("#progressbar_container").show();
+    }
+
+    function progressBarUpdate(percentage) {
+        percentage = Math.round(percentage);
+        $('#progressbar_label').html(percentage + "%");
+        $("#progressbar").width(percentage + "%");
+    }
+
+    function progressBarComplete() {
+        $("#progressbar_container").fadeOut(500);
+        ClearAttachmentData();
+        LoadAttachmentPartial();
+    }
+
+    function multiUpload(attachmentId, count, counter, blob, completed, start, end, bytesPerChunk) {
+        try {
+            counter = counter + 1;
+            if (counter <= count) {
+                var chunk = blob.slice(start, end);
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function() {
+                    start = end;
+                    end = start + bytesPerChunk;
+                    if (count == counter) {
+                        progressBarUpdate(100);
+                        progressBarComplete();
+                    } else {
+                        var percentage = (counter / count) * 100;
+                        progressBarUpdate(percentage);
+                        multiUpload(attachmentId, count, counter, blob, completed, start, end, bytesPerChunk);
+                    }
+                }
+                xhr.open("POST", "/Artifact/AttachmentMultiUpload?id=" + attachmentId + "&partNum=" + counter, true);
+                xhr.send(chunk);
+            }
+        } catch (err) {
+            alert("Error while adding attachment.  Please make sure the file is not open by another application and try again.");
+            progressBarComplete();
+        }
+    }
+
+    function UploadFile(attachmentId) {
+        $('#addAttachmentBtn').prop("disabled", true);
+        try {
+            var blob = file;
+            var bytesPerChunk = 10240000;// cut the file into 10Meg chunks
+            var size = blob.size;
+
+            var start = 0;
+            var end = bytesPerChunk;
+            var completed = 0;
+            var count = size % bytesPerChunk == 0 ? size / bytesPerChunk : Math.floor(size / bytesPerChunk) + 1;
+            var counter = 0;
+            progressBarStart();
+            multiUpload(attachmentId, count, counter, blob, completed, start, end, bytesPerChunk);
+        }
+        catch(err) {
+            alert("Error while adding attachment.  Please make sure the file is not open by another application and try again.");
+            progressBarComplete();
+        }
+    }
+
+    //End File Upload Region
+</script>

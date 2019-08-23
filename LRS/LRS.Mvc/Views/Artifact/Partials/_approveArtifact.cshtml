@@ -1,0 +1,60 @@
+﻿@model LRS.Mvc.Models.CommentModel
+
+<div class="modal fade" id="dvReject" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="ClearRejectData()">×</button>
+                <h4 class="modal-title" id="modalTitleReject">Reject Artifact @Model.StiNumber</h4>
+            </div>
+            @using (Html.BeginForm("MarkReviewRejected", "Artifact", FormMethod.Post, new { id = "frmReject" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.MainId)
+                @Html.HiddenFor(m => m.CommentReviewId)
+                <div class="modal-body">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title"></h3>
+                        </div>
+                        <div class="panel-body form-horizontal">
+                            <p>Please provide a reason in the comment of why you are rejecting this Artifact</p>
+                            <div class="row text-nowrap">
+                                <div class="col-md-12">
+                                    <label class="control-label col-sm-2" for="RejectComment"><b style="color: red;">* </b>Comment</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @Html.BsTextAreaFor(m => m.RejectComment, new { @class = "help" })
+                                    <label id="RejectCommentMsg" hidden><b style="color: red;">Comment is required</b></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="MarkRejected();" class="btn btn-sm btn-danger">Reject Actifact</button>
+                    <button type="button" class="btn btn-sm btn-default" onclick="ClearRejectCommentData()">Cancel</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function MarkRejected() {
+        var cmt = $('#RejectComment').val();
+        if (cmt.trim() == '') {
+            $('#RejectCommentMsg').show();
+        } else {
+            $('#frmReject').submit();
+        }
+    }
+
+    function ClearRejectCommentData() {
+        $('#dvReject').modal('hide');
+        $("#RejectCommentMsg").hide();
+        $("#RejectComment").val('');
+    }
+</script>

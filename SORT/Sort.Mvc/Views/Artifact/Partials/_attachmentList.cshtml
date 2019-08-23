@@ -1,0 +1,20 @@
+﻿@model List<Sort.Business.SortAttachmentObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("attachments").Columns(c =>
+        {
+        c.Bound(m => m.SortMainId).Hidden();
+        c.Bound(m => m.SortAttachmentId).Hidden();
+        c.Bound(m => m.FileName).Title("File Name").Sortable(false);
+        c.Bound(m => m.AttachmentTypeName).Title("Attachment Type").Sortable(false);
+        c.Bound(m => m.Note).Title("Description").Sortable(false);
+        c.Bound(m => m.Size).Title("File Size").Sortable(false);
+        c.Bound(m => m.UploadDate).Title("Date Attached").Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button().Icon("download").Type("primary").ToolTip("Download Attachment")
+                .Href(Url.Action("DownloadAttachment", "Artifact", new { id = "{SortAttachmentId}"}));
+            b.Button("RemoveAttachment").Icon("times").Type("danger").ToolTip("Remove Attachment");
+        }).Width(30).AlignCenter();
+    }).Clean()
+</div>

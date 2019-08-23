@@ -1,0 +1,40 @@
+﻿@using LRS.Business
+@using LRS.EmployeeHelper
+@using LRS.Mvc.Classes
+@model LRS.Business.GenericReviewUserObject
+@{
+    ViewBag.Title = (Model.GenericUserId > 0 ? "Edit" : "Add") + " Review Generic User Access";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next("Review Generic User Access", Url.Action("GenericReviewUsers", "Lookup", new { type = Model.ReviewerType }))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-6">
+    <div class="panel panel-primary">
+        <div class="panel panel-heading">
+            <h3 class="panel-title">@ViewBag.Title</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.GenericUserId)
+            @Html.HiddenFor(m => m.ReviewerType)
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-1">User</label>
+                    <div class="col-md-11">
+                        @Html.EmployeeFor(m => m.EmployeeId, Url.Action("SearchEmployees", "Lookup"))
+                        @Html.ValidationMessageFor(m => m.EmployeeId)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-1 col-md-11">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="@Url.Action("GenericReviewUsers", new {type = Model.ReviewerType })" class="btn btn-default">Cancel</a>
+                    </div>
+                </div>
+            </div>}
+    </div>
+</div>

@@ -1,0 +1,31 @@
+﻿@model List<LRS.Business.AuthorObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("authors").Columns(c =>
+        {
+            c.Bound(m => m.AuthorId).Hidden();
+            c.Bound(m => m.MainId).Hidden();
+            c.Bound(m => m.IsValid).Hidden();
+            c.Bound(m => m.Name).Sortable(false).Render("AuthorNameRender");
+            c.Bound(m => m.Affiliation).Sortable(false);
+            c.Bound(m => m.OrcidId).Sortable(false);
+            c.Bound(m => m.CountryState).Title("Country / State").Sortable(false);
+            c.Bound(m => m.IsPrimary).Title("Primary").Order(SortDir.desc).Sortable(false);
+            c.Buttons(b =>
+            {
+                b.Button("EditAuthor").Icon("edit").Type("primary").Title("Edit").ToolTip("Edit Author");
+                b.Button("SetAuthorPrimary").Icon("user").Type("warning").Title("Primary").ToolTip("Set as Primary Author");
+                b.Button("RemoveAuthor").Icon("times").Type("danger").Title("Remove").ToolTip("Remove Author");
+            }).Width(240).AlignCenter().NoWrap();
+        }).Clean()
+</div>
+
+<script>
+    function AuthorNameRender(data, type, row) {
+        if (row["IsValid"] == "True") {
+            return data;
+        } else {
+            return "<i style=\"Color:Red;\">(Invalid) </i>" + data;
+        }
+    }
+</script>

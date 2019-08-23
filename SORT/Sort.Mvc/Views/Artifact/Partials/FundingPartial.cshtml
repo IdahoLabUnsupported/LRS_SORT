@@ -1,0 +1,611 @@
+﻿@using Sort.Business
+@using Sort.EmployeeHelper
+@model Sort.Mvc.Models.IFunding
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Funding</b></p>
+    <p>The Fiscal Year of the funding, Contract Number, Percentage (usually 100%), and the company organization through which the funding was allocated 
+        (usually the "work org.") must be specified.</p>
+    <p>The funding source (DOE Program, Grant Number, Laboratory Directed Research and Development Tracking Number, 
+        Nuclear Energy University Program Grant Number, Strategic Partnership Project Category, or other non-DOE customer) must be specified.</p>
+</div>
+
+@using (Html.BeginForm("AddFunding", "Artifact", FormMethod.Post, new { id = "FundingForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.FundingId)
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.HiddenFor(m => m.DoeFundingNumber)
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-2">@Html.BsLabelFor(m => m.Year, new {@class = "required col-md-3"})</div>
+                <div class="col-md-5">@Html.BsLabelFor(m => m.FundingTypeId, new {@class = "required col-md-3"})</div>
+                <div class="col-md-3">@Html.BsLabelFor(m => m.ContractNumber, new {@class = "required col-md-3"})</div>
+                <div class="col-md-2">@Html.BsLabelFor(m => m.Percent, new {@class = "required col-md-3"})</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-2">
+                    @Html.BsDropDownListFor(m => m.Year, Helper.FiscalYears, " --Select-- ")
+                    @Html.ValidationMessageFor(m => m.Year, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-5">
+                    @Html.BsDropDownListFor(m => m.FundingTypeId, MemoryCache.FundingTypeList(true, Model.FundingTypeId), " --Select-- ")
+                    @Html.ValidationMessageFor(m => m.FundingTypeId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    @Html.BsTextBoxFor(m => m.ContractNumber)
+                    @Html.ValidationMessageFor(m => m.ContractNumber, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-2">
+                    @Html.BsInputMaskFor(m => m.Percent, InputMaskFormat.Percentage)
+                    @Html.ValidationMessageFor(m => m.Percent, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            
+            <br />
+            <div class="row text-nowrap">
+                <div class="col-md-5">@Html.BsLabelFor(m => m.Org, new {@class = "required col-md-3" })</div>
+                <div class="col-md-7">@Html.BsLabelFor(m => m.ProjectArea, new {@class = "col-md-3"})</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5">
+                    @Html.BsDropDownListFor(m => m.Org, Helper.OrgList, " --Select --")
+                    @Html.ValidationMessageFor(m => m.Org, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-7">
+                    @Html.BsTextBoxFor(m => m.ProjectArea)
+                    @Html.ValidationMessageFor(m => m.ProjectArea, "", new { @class = "text-danger" })
+                </div>
+
+            </div>
+
+            <div id="GrantDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-3">@Html.BsLabelFor(m => m.GrantNumber, new {@class = "required col-md-3"})</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        @Html.BsTextBoxFor(m => m.GrantNumber)
+                        @Html.ValidationMessageFor(m => m.GrantNumber, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div id="DoeDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-5">@Html.BsLabelFor(m => m.DoeFundingCategoryId, new {@class = "required col-md-3"})</div>
+                    <div class="col-md-5">@Html.BsLabelFor(m => m.MilestoneTrackingNumber, new { @class = "milestonetrack col-md-3", @hidden = "hidden" })</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        @Html.BsDropDownListFor(m => m.DoeFundingCategoryId, MemoryCache.DoeFundingList(true, Model.DoeFundingCategoryId), " --Select --")
+                        @Html.ValidationMessageFor(m => m.DoeFundingCategoryId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-5">
+                        @Html.BsTextBoxFor(m=> m.MilestoneTrackingNumber, new { @class = "milestonetrack", @hidden = "hidden"})
+                        @Html.ValidationMessageFor(m => m.DoeFundingCategoryId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div id="LdrdDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-3">@Html.BsLabelFor(m => m.TrackingNumber, new {@class = "required col-md-3"})</div>
+                    <div class="col-md-3">@Html.BsLabelFor(m => m.ProjectNumber, new {@class = "col-md-3"})</div>
+                    <div class="col-md-6">@Html.BsLabelFor(m => m.PrincipalInvEmployeeId, new {@class = "col-md-3"})</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        @Html.BsTextBoxFor(m => m.TrackingNumber)
+                        @Html.ValidationMessageFor(m => m.TrackingNumber, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.BsTextBoxFor(m => m.ProjectNumber)
+                        @Html.ValidationMessageFor(m => m.ProjectNumber, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6">
+                        @Html.EmployeeFor(m => m.PrincipalInvEmployeeId, Url.Action("SearchEmployees", "Home"))
+                        @Html.ValidationMessageFor(m => m.PrincipalInvEmployeeId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div id="SppDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-5">@Html.BsLabelFor(m => m.SppCategoryId, new {@class = "required col-md-3"})</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        @Html.BsDropDownListFor(m => m.SppCategoryId, MemoryCache.SppFundingList(true, Model.SppCategoryId), " --Select-- ")
+                        @Html.ValidationMessageFor(m => m.SppCategoryId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3">
+                        @Html.BsCheckBoxFor(m => m.SppApproved, "SPP Is Approved")
+                        @Html.ValidationMessageFor(m => m.SppApproved, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <br />
+
+                <div class="row text-nowrap">
+                    <div class="col-md-12 spp-approve">@Html.BsLabelFor(m => m.ApproveNoReason, new {@class = "required col-md-3"})</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 spp-approve">
+                        @Html.BsTextBoxFor(m => m.ApproveNoReason)
+                        @Html.ValidationMessageFor(m => m.ApproveNoReason, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div id="SppFaDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-6">@Html.BsLabelFor(m => m.FederalAgencyId, new {@class = "required col-md-3"})</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        @Html.BsDropDownListFor(m => m.FederalAgencyId, MemoryCache.SppFundingFederalAgenciesList(true, Model.FederalAgencyId), " --Select-- ")
+                        @Html.ValidationMessageFor(m => m.FederalAgencyId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div id="SppOtherDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-12">@Html.BsLabelFor(m => m.OtherDescription, new {@class = "required col-md-3"})</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.BsTextBoxFor(m => m.OtherDescription)
+                        @Html.ValidationMessageFor(m => m.OtherDescription, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div id="SppForeignDiv" hidden>
+                <br />
+                <div class="row text-nowrap">
+                    <div class="col-md-5">@Html.BsLabelFor(m => m.CountryId, new {@class = "required col-md-3"})</div>
+                    <div class="col-md-5">@Html.BsLabelFor(m => m.AdditionalInfo, new {@class = "col-md-3"})</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-5">
+                        @Html.BsDropDownListFor(m => m.CountryId, MemoryCache.CountryList(true, Model.CountryId), " --Select-- ")
+                        @Html.ValidationMessageFor(m => m.CountryId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-7">
+                        @Html.BsTextBoxFor(m => m.AdditionalInfo)
+                        @Html.ValidationMessageFor(m => m.AdditionalInfo, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+            <br/>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div id="UpdateFundingBtn" style="display:none;">
+                        <div class="pull-left" style="padding: 5px;">
+                            <button type="button" onclick="AddFunding()" class="btn btn-sm btn-success">Update</button>
+                        </div>
+                        <div class="pull-left" style="padding: 5px;">
+                            <button type="button" onclick="CancelFunding()" class="btn btn-sm btn-primary">Cancel</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="AddFundingBtn">
+                        <button type="button" onclick="AddFunding()" class="btn btn-sm btn-success">Add</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+<div id="FundingPartial">
+    @Html.Partial("Partials/_fundingList", Model.Funding)
+</div>
+
+@*NOTE: Used for loading the Funding Info partial*@
+<div id="FundingInfo">
+
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        if ($('#ContractNumber').val() == '') {
+            $('#ContractNumber').val($('#DoeFundingNumber').val());
+        }
+
+        $('#FundingTypeId').change(function () {
+            ClearGrant();
+            ClearDoe();
+            ClearLdrd();
+            ClearSpp();
+            switch ($('#FundingTypeId').val()) {
+                case '1': //DOE
+                    $('#DoeDiv').show(); 
+                    break;
+                case '2': //LDRD
+                    $('#LdrdDiv').show();
+                    break;
+                case '4': //Other
+                    $('#SppOtherDiv').show();
+                    break;
+                case '5': //SPP
+                    $('#SppDiv').show();
+                    break;
+                case '6': //Grant
+                case '7': //NEUP
+                    $('#GrantDiv').show();
+                    break;
+            }
+        });
+
+        $('#SppCategoryId').change(function () {
+            ClearSppFa();
+            ClearSppOther();
+            ClearSppForeign();
+            switch ($('#SppCategoryId').val()) {
+                case '1'://Federal Agency
+                    $('#SppFaDiv').show();
+                    break;
+                case '6'://Other
+                    $('#SppOtherDiv').show();
+                    break;
+                case '7'://Foreign
+                    $('#SppForeignDiv').show();
+                    break;
+            };
+
+        });
+
+        $('#SppApproved').change(function () {
+            if (this.checked) {
+                $('.spp-approve').hide();
+            } else {
+                $('.spp-approve').show();
+            }
+        });
+
+        $("#DoeFundingCategoryId").change(function() {
+            if ($("#DoeFundingCategoryId").val() == '4') {
+                $('.milestonetrack').show();
+            } else {
+                $('.milestonetrack').hide();
+            }
+        });
+
+        if ($('#FundingId').val() != '' && $('#FundingId').val() != '0') {
+            switch ($('#FundingTypeId').val()) {
+                case '1': //DOE
+                    $('#DoeDiv').show();
+                    break;
+                case '2': //LDRD
+                    $('#LdrdDiv').show();
+                    break;
+                case '4': //Other
+                    $('#SppOtherDiv').show();
+                    break;
+                case '5': //SPP
+                    $('#SppDiv').show();
+                    break;
+                case '6': //Grant
+                case '7': //NEUP
+                    $('#GrantDiv').show();
+                    break;
+            }
+
+            switch ($('#SppCategoryId').val()) {
+                case '1'://Federal Agency
+                    $('#SppFaDiv').show();
+                    break;
+                case '6'://Other
+                    $('#SppOtherDiv').show();
+                    break;
+                case '7'://Foreign
+                    $('#SppForeignDiv').show();
+                    break;
+            };
+
+            if ($('#SppApproved').attr('checked')) {
+                $('.spp-approve').hide();
+            } else {
+                $('.spp-approve').show();
+            }
+
+            if ($("#DoeFundingCategoryId").val() == '4') {
+                $('.milestonetrack').show();
+            } else {
+                $('.milestonetrack').hide();
+            }
+
+            $('#AddFundingBtn').hide();
+            $('#UpdateFundingBtn').show();
+        }
+
+        CheckFundingRequired();
+    });
+
+    function CancelFunding() {
+        ClearFundingData();
+        $('#AddFundingBtn').show();
+        $('#UpdateFundingBtn').hide();
+    }
+
+    function AddFunding() {
+        if (CheckFundingRequiredMet() === true) {
+            var form = $('#FundingForm');
+            $('.nav-pills a[href=#fundingTab]').addClass('saving');
+
+            $.post(form.attr('action'),form.serialize(),
+                function (data) {
+                    $("#FundingPartial").html(data);
+                    CheckFundingRequired();
+                    ClearFundingData();
+                })
+                .fail(function (response) { alert("Unable to Save the Funding.  Required fields missing or Invalid."); })
+                .always(function () { $('.nav-pills a[href=#fundingTab]').removeClass('saving'); });
+        }
+    }
+
+    function RemoveFunding(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Funding',
+            content: 'Are you sure you wish to remove this funding?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#fundingTab]').addClass('saving');
+                $.post("/Artifact/RemoveFunding",
+                    {
+                        id: row['FundingId']
+                    },
+                    function (data) {
+                        $("#FundingPartial").html(data);
+                        CheckFundingRequired();
+                    }).fail(function (response) { alert(response.responseText); })
+                    .always(function () { $('.nav-pills a[href=#fundingTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function ShowFundingInfo(row) {
+        $.post("/Artifact/GetFundingInfoPartial",
+            {
+                id: row['FundingId']
+            },
+            function (data) {
+                $("#FundingInfo").html(data);
+                $('#dvFundingInfo').modal('show');
+            }).fail(function (response) { alert(response.responseText); });
+    }
+
+    function CheckFundingRequiredMet() {
+        var isValid = true;
+
+        if ($('#SortMainId').val() == '' || $('#SortMainId').val() == '0') return false;
+        if ($('#FundingTypeId').val() == '' || $('#FundingTypeId').val() == '0') {
+            isValid = false;
+            SetValidationMsg('FundingTypeId', 'Funding Type is required');
+        } else {
+            SetValidationMsg('FundingTypeId', '');
+        }
+        
+        if ($('#Year').val() == '') {
+            isValid = false;
+            SetValidationMsg('Year', 'Fiscal Year is required');
+        } else {
+            SetValidationMsg('Year', '');
+        }
+
+        if ($('#Percent').val() == '') {
+            isValid = false;
+            SetValidationMsg('Percent', 'Percent is required');
+        } else {
+            SetValidationMsg('Percent', '');
+        }
+
+        if ($('#ContractNumber').val() == '') {
+            isValid = false;
+            SetValidationMsg('ContractNumber', 'Contract Number is required');
+        } else {
+            SetValidationMsg('ContractNumber', '');
+        }
+
+        if ($('#Org').val() == '') {
+            isValid = false;
+            SetValidationMsg('Org', 'Funding Org is required');
+        } else {
+            SetValidationMsg('Org', '');
+        }
+
+        switch ($('#FundingTypeId').val()) {
+            case '1': //DOE
+                if ($('#DoeFundingCategoryId').val() == '') {
+                    isValid = false;
+                    SetValidationMsg('DoeFundingCategoryId', 'DOE Program is required');
+                } else {
+                    SetValidationMsg('DoeFundingCategoryId', '');
+                }
+                break;
+            case '2': //LDRD
+                if ($('#TrackingNumber').val() == '') {
+                    isValid = false;
+                    SetValidationMsg('TrackingNumber', 'Tracking Number is required');
+                } else {
+                    SetValidationMsg('TrackingNumber', '');
+                }
+                break;
+            case '4': //Other
+                if ($('#OtherDescription').val() == '') {
+                    isValid = false;
+                    SetValidationMsg('OtherDescription', 'Description is required');
+                } else {
+                    SetValidationMsg('OtherDescription', '');
+                }
+                break;
+            case '5': //SPP
+                if ($('#SppCategoryId').val() == '') {
+                    isValid = false;
+                    SetValidationMsg('SppCategoryId', 'SPP Category is required');
+                } else {
+                    SetValidationMsg('SppCategoryId', '');
+                }
+                if ($('#SppApproved').is(":checked") == false ) {
+                    if ($('#ApproveNoReason').val() == '') {
+                        isValid = false;
+                        SetValidationMsg('ApproveNoReason', 'Not Approved Reason is required');
+                    } else {
+                        SetValidationMsg('ApproveNoReason', '');
+                    }
+                }
+                switch ($('#SppCategoryId').val()) {
+                    case '1'://Federal Agency
+                        if ($('#FederalAgencyId').val() == '') {
+                            isValid = false;
+                            SetValidationMsg('FederalAgencyId', 'Federal Agency is required');
+                        } else {
+                            SetValidationMsg('FederalAgencyId', '');
+                        }
+                        break;
+                    case '6'://Other
+                        if ($('#OtherDescription').val() == '') {
+                            isValid = false;
+                            SetValidationMsg('OtherDescription', 'Description is required');
+                        } else {
+                            SetValidationMsg('OtherDescription', '');
+                        }
+                        break;
+                    case '7'://Foreign
+                        if ($('#CountryId').val() == '') {
+                            isValid = false;
+                            SetValidationMsg('CountryId', 'Country is required');
+                        } else {
+                            SetValidationMsg('CountryId', '');
+                        }
+                        break;
+                };
+                break;
+            case '6': //Grant
+            case '7': //NEUP
+                if ($('#GrantNumber').val() == '') {
+                    isValid = false;
+                    SetValidationMsg('GrantNumber', 'Grant Number is required');
+                } else {
+                    SetValidationMsg('GrantNumber', '');
+                }
+                break;
+        }
+
+        return isValid;
+    }
+
+    function ClearFundingData() {
+        ClearAllValidationMsgs();
+        $('#FundingId').val('');
+        $("#Year").find('option').attr("selected", false).trigger('change');
+        $("#FundingTypeId").find('option').attr("selected", false).trigger('change');
+        $('#ContractNumber').val($('#DoeFundingNumber').val());
+        $('#Percent').val('');
+        $("#Org").find('option').attr("selected", false).trigger('change');
+        $('#ProjectArea').val('');
+        ClearGrant();
+        ClearDoe();
+        ClearLdrd();
+        ClearSpp();
+    }
+
+    function ClearGrant() {
+        $('#GrantDiv').hide();
+        $('#GrantNumber').val('');
+    }
+
+    function ClearDoe() {
+        $('#DoeDiv').hide();
+        $("#DoeFundingCategoryId").find('option').attr("selected", false).trigger('change');
+    }
+
+    function ClearLdrd() {
+        $('#LdrdDiv').hide();
+        $('#TrackingNumber').val('');
+        $('#ProjectNumber').val('');
+        $('#PrincipalInvEmployeeId').val('');
+    }
+
+    function ClearSpp() {
+        ClearSppFa();
+        ClearSppOther();
+        ClearSppForeign();
+        $('#SppDiv').hide();
+        $("#SppCategoryId").find('option').attr("selected", false);
+        $('#SppApproved').attr('checked', false);
+        $('.spp-approve').show();
+        $('#ApproveNoReason').val('');
+    }
+
+    function ClearSppFa() {
+        $('#SppFaDiv').hide();
+        $("#FederalAgencyId").find('option').attr("selected", false);
+    }
+
+    function ClearSppOther() {
+        $('#SppOtherDiv').hide();
+        $("#OtherDescription").val('');
+    }
+
+    function ClearSppForeign() {
+        $('#SppForeignDiv').hide();
+        $("#CountryId").find('option').attr("selected", false);
+        $("#AdditionalInfo").val('');
+    }
+
+    function ClearAllValidationMsgs() {
+        SetValidationMsg('FundingTypeId', '');
+        SetValidationMsg('Year', '');
+        SetValidationMsg('Percent', '');
+        SetValidationMsg('ContractNumber', '');
+        SetValidationMsg('Org', '');
+        SetValidationMsg('DoeFundingCategoryId', '');
+        SetValidationMsg('TrackingNumber', '');
+        SetValidationMsg('OtherDescription', '');
+        SetValidationMsg('SppCategoryId', '');
+        SetValidationMsg('ApproveNoReason', '');
+        SetValidationMsg('FederalAgencyId', '');
+        SetValidationMsg('OtherDescription', '');
+        SetValidationMsg('CountryId', '');
+        SetValidationMsg('GrantNumber', '');
+    }
+
+    function CheckFundingRequired() {
+        if ($('#funding >tbody:last >tr').length > 0 &&
+            !$('#funding >tbody:last >tr >td').hasClass('dataTables_empty') &&
+            $("#funding tr td:contains('(Invalid)')").length <= 0) {
+            $('.nav-pills a[href=#fundingTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#fundingTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

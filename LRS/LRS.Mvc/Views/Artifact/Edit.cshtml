@@ -1,0 +1,544 @@
+﻿@using LRS.Business
+@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.ArtifactModel
+@{
+    ViewBag.Title = "Edit Artifact " + @Model.Main.StiNumber;
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+
+<style>
+    em.undefined-display {
+        display: none;
+    }
+
+    .nav-pills > li > a {
+        border-radius: 14px 0 14px 0;
+    }
+</style>
+
+@Html.HiddenFor(m => m.SelectedTab)
+@Html.HiddenFor(m => m.MainId)
+@Html.HiddenFor(m => m.Status)
+
+<div class="col-md-12">
+    @*<a onclick="SendHome();" class="btn btn-link"><i class="fa fa-long-arrow-left"></i> Home</a>*@
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><strong>@Model.Main.StiNumber:</strong> @Model.Main.Title</h3>
+        </div>
+    <div class="panel-body">
+        <div class="col-md-2 pnl">
+            <ul id="artifactTabs" class="nav nav-pills nav-stacked">
+                <li role="presentation" data-savefunction="TitleSave" class="active"><a href="#titleTab" data-toggle="tab">Main Info</a></li>
+                <li role="presentation" data-savefunction="AbstractSave"><a href="#abstractTab" data-toggle="tab">Abstract</a></li>
+                <li role="presentation" data-savefunction="ContractSave"><a href="#contactsTab" data-toggle="tab">Contact(s)</a></li>
+                <li role="presentation" data-savefunction="AuthorSave"><a href="#authorsTab" data-toggle="tab">Author(s)</a></li>
+                <li role="presentation" data-savefunction="FundingSave"><a href="#fundingTab" data-toggle="tab">Funding</a></li>
+                <li role="presentation" data-savefunction="SubjectSave"><a href="#subjectTab" data-toggle="tab">Subject</a></li>
+                @*<li role="presentation" data-savefunction="SponsorSave"><a href="#sponsorTab" data-toggle="tab">Sponsoring Org(s)</a></li>*@
+                <li role="presentation" data-savefunction="KeywordSave"><a href="#keywordsTab" data-toggle="tab">Keyword(s)</a></li>
+                <li role="presentation" data-savefunction="IntellectualSave"><a href="#intellectualsTab" data-toggle="tab">Intellectual Property</a></li>
+                <li role="presentation" data-savefunction="CoreCapabilitiesSave"><a href="#coreCapabilitiesTab" data-toggle="tab">Core Capabilities</a></li>
+                <li role="presentation" data-savefunction="AttachmentsSave"><a href="#attachmentsTab" data-toggle="tab">Attachment(s)</a></li>
+                <li role="presentation" data-savefunction="ReviewersSave"><a href="#reviewersTab" data-toggle="tab">Reviews</a></li>
+                @if (Model.Main.ReviewHistory != null && Model.Main.ReviewHistory.Count > 0)
+                {
+                    <li role="presentation" data-savefunction="ReviewerHistorySave"><a href="#reviewerHistoryTab" data-toggle="tab">Review History</a></li>
+                }
+            </ul>
+        </div>
+
+        <div class="tab-content clearfix">
+            @*title*@
+            <div class="tab-pane fade in active" id="titleTab">
+                <div class="col-md-10 pnl well">
+                    <a class="btn btn-info btn-xs pull-right btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Partial("Partials/TitlePartial", Model.Main)
+                    </div>
+                    <a class="btn btn-info btn-xs pull-right btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                </div>
+            </div>
+            @*end title*@
+
+            @*ProductType conference*@
+            <div class="tab-pane fade in" id="conferenceTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Partial("Partials/ConferencePartial", Model.Main)
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+
+                </div>
+            </div>
+            @*end ProductType conference*@
+
+            @*contacts*@
+            <div class="tab-pane fade in" id="contactsTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="MainContactPartial" class="panel-body">
+                        @Html.Action("ContactsPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end contacts*@
+
+            @*Authors*@
+            <div class="tab-pane fade in" id="authorsTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="MainAuthorPartial" class="panel-body">
+                        @Html.Action("AuthorsPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end Authors*@
+
+            @*Funding*@
+            <div class="tab-pane fade in" id="fundingTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div id="MainFundingPartial" class="panel-body">
+                        @Html.Action("FundingPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end Funding*@
+
+            @*Abstract*@
+            <div class="tab-pane fade in" id="abstractTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Partial("Partials/AbstractPartial", Model.Main)
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end Abstract*@
+
+            @*Subject*@
+            <div class="tab-pane fade in" id="subjectTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Action("SubjectPartial", "Artifact", new { id = Model.MainId })
+                        @*@Html.Partial("Partials/SubjectPartial", Model)*@
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end Subject*@
+
+            @*CoreCapabilities*@
+            <div class="tab-pane fade in" id="coreCapabilitiesTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Action("CoreCapabilitiesPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end CoreCapabilities*@
+
+            @*Keywords*@
+            <div class="tab-pane fade in" id="keywordsTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Action("KeywordPartial", "Artifact", new { id = Model.MainId })
+                        @*@Html.Partial("Partials/KeywordsPartial", Model)*@
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end Keywords*@
+
+            @*Sponsoring Organizations*@
+            @*<div class="tab-pane fade in" id="sponsorTab">
+            <div class="col-md-10 pnl well">
+                <div class="panel-body">
+                    @Html.Action("SponsorOrgPartial", "Artifact", new { id = Model.MainId })
+                </div>
+            </div>
+        </div>*@
+            @*end Sponsoring Organizations*@
+
+            @*intellectuals*@
+            <div class="tab-pane fade in" id="intellectualsTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Action("IntellectualPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end intellectuals*@
+
+            @*Attachments*@
+            <div class="tab-pane fade in" id="attachmentsTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Action("AttachmentPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            @*end Attachments*@
+
+            @*Reviewers*@
+            <div class="tab-pane fade in" id="reviewersTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        @if (Model.Main.ReviewHistory != null && Model.Main.ReviewHistory.Count > 0)
+                        {
+                            <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        }
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Action("ReviewersPartial", "Artifact", new { id = Model.MainId })
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        @if (Model.Main.ReviewHistory != null && Model.Main.ReviewHistory.Count > 0)
+                        {
+                            <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        }
+                    </div>
+                </div>
+            </div>
+            @*end Reviewers*@
+
+            @*Review History*@
+            <div class="tab-pane fade in" id="reviewerHistoryTab">
+                <div class="col-md-10 pnl well">
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body">
+                        @Html.Partial("Partials/ReviewHistoryPartial", Model.Main.ReviewHistory)
+                    </div>
+                    <div class="pull-right">
+                        <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                    </div>
+                </div>
+            </div>
+            @*end Review History*@
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-primary">
+    <div class="panel-body">
+        <div class="col-md-12">
+            <div class="pull-left">
+                <a onclick="SendHome();" class="btn btn-sm btn-default"><i class="fa fa-home"></i> Home</a>
+                @if (Model.ParentId.HasValue)
+                {
+                    <a href="@Url.Action("Index", new {id = Model.ParentId})" title="View Previous Artifact Revision" class="btn btn-sm btn-default"><i class="fa fa-backward"></i> Previous Revision</a>
+                }
+                @if (Model.ChildId.HasValue)
+                {
+                    <a href="@Url.Action("Index", new {id = Model.ChildId})" title="View Next Artifact Revision" class="btn btn-sm btn-default"><i class="fa fa-forward"></i> Next Revision</a>
+                }
+                @if (Model.StatusEnum.HasValue && Model.StatusEnum.Value != StatusEnum.Completed)
+                {
+                    <a onclick="CancelArtifact();" title="Cancel Artifact" class="btn btn-sm btn-danger"><i class="fa fa-exclamation"></i> Cancel Artifact</a>
+                }
+                <a id="reviewPeerDiv" hidden="hidden" onclick="StartPeerReview()" class="btn btn-sm btn-success"><i class="fa fa-user"></i> Start Peer Review(s)</a>
+                <a id="reviewManagerDiv" hidden="hidden" onclick="StartReview()" class="btn btn-sm btn-primary"><i class="fa fa-user"></i> Start Manager Review(s)</a>
+                <button id="markCompleteBtn" type="button" onclick="MarkCompleted();" class="btn btn-sm btn-warning" hidden="hidden"><i class="fa fa-check-square"></i> Mark Artifact Completed</button>
+            </div>
+            @if (Current.IsReleaseOfficer)
+            {
+                <div class="pull-right">
+                    <div class="btn-group btn-group-sm">
+                        <input name="button" type="button" value="Admin Control" class="btn btn-warning btn-sm"/>
+                        <button type="button" class="btn btn-warning btn-sm dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            @if (Model.StatusEnum.HasValue && Model.StatusEnum != StatusEnum.New && Model.StatusEnum != StatusEnum.InPeerReview)
+                            {
+                                <li><button type="button" onclick="location.href = '@Url.Action("Index", new {id = Model.MainId})'" style="width: 100%;" class="btn btn-sm btn-warning">View Artifact</button></li>
+                            }
+                            <li><input name="button" type="button" onclick="CancelArtifact();" value="Cancel Artifact" style="width: 100%;" class="btn btn-sm btn-warning"/></li>
+                            @if (Current.IsAdmin)
+                            {
+                                <li><button type="button" onclick="location.href = '@Url.Action("Delete", new {id = Model.MainId})'" style="width: 100%;" class="btn btn-sm btn-danger">Delete Artifact</button></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var stab = $('#SelectedTab').val();
+        if (stab != '') {
+            $('a[href="#' + stab + '"]').trigger('click');
+        }
+
+        $('.btnNext').click(function () {
+            $('.nav-pills > .active').next('li').find('a').trigger('click');
+        });
+
+        $('.btnPrevious').click(function () {
+            $('.nav-pills > .active').prev('li').find('a').trigger('click');
+        });
+        
+    });
+
+    // This is used to call a save function when a tab is hidden (or moved off from)
+    $(document).on('hide.bs.tab', 'a[data-toggle="tab"]', function (e) {
+        TriggerSaveFunction($(e.target).parent());
+    });
+
+    // This is used to call the save funciton when the window is unloading.
+    $(window).unload(function () {
+        TriggerSaveFunction($('#artifactTabs li.active'));
+    });
+
+    function FireButton(el, method) {
+        var tr = $(el).closest('tr');
+        var tb = $(el).closest('table').data('datatable');
+        var d = tb.row(tr).data();
+        method.call(el, d);
+    }
+
+    function CheckForCompletion() {
+        $('#reviewPeerDiv').hide();
+        $('#reviewManagerDiv').hide();
+
+        if ($('#artifactTabs li a.required').length == 0) {
+            var status = $('#Status').val();
+            if (status == 'New') {
+                if (($("#reviews tr td:contains('Peer') + td:contains('Under Review')").length > 0) ||
+                    ($("#reviews tr td:contains('Peer') + td:contains('Pending')").length > 0)) {
+                    $('#reviewPeerDiv').show();
+                } else {
+                    $('#reviewManagerDiv').show();
+                }
+            } else if (status == 'InPeerReview') {
+                if (($("#reviews tr td:contains('Peer') + td:contains('Under Review')").length > 0) ||
+                    ($("#reviews tr td:contains('Peer') + td:contains('Pending')").length > 0)) {
+                } else {
+                    $('#reviewManagerDiv').show();
+                }
+            }
+        }
+    }
+
+    function ReviewStatusRender(data, type, row) {
+        if (data == "Complete" ||
+            data == "Approved") {
+            return '<div style="color: green;">' + data + '</div>';
+        } else if (data == 'Rejected' ||
+            data == 'NotReviewing') {
+            return '<div style="color: red;">' + data + '</div>';
+        }
+
+        return data;
+    }
+
+    // Function to call the tabs save function.
+    function TriggerSaveFunction(obj) {
+        if (obj != null && obj != '') {
+            // Get the save function data from the object
+            var functionName = obj.data("savefunction");
+            if (functionName != '') {
+                // Need to add window. to the first of the function name to be able to search inside the entire area
+                // This is since the function is dynamically loaded.
+                functionName = 'window.' + functionName;
+                // Eval the function name to find the function.
+                var saveFunction = eval(functionName);
+                // Make sure it is a function
+                if ($.isFunction(saveFunction)) {
+                    // Call the function
+                    saveFunction();
+                }
+            }
+        }
+    }
+
+    function SetValidationMsg(control, msg) {
+        $('[data-valmsg-for="' + control + '"]').html(msg);
+    }
+
+    function EditAuthor(row) {
+        $.get("/Artifact/AuthorsPartial",
+            {
+                id: row['MainId'],
+                rid: row['AuthorId']
+            },
+            function (data) {
+                $("#MainAuthorPartial").html(data);
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+
+    function EditFunding(row) {
+        $.get("/Artifact/FundingPartial",
+            {
+                id: row['MainId'],
+                rid: row['FundingId']
+            },
+            function (data) {
+                $("#MainFundingPartial").html(data);
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+
+    function StartPeerReview() {
+        $.confirm({
+            title: 'Start Peer Review(s)',
+            content: 'Are you sure you wish to start the peer review(s) for this artifact? You will still be able to edit the artifact while the review(s) are happening.',
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-warning',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                TriggerSaveFunction($('#artifactTabs li.active'));
+                window.location.href = "/Artifact/StartReviews/" + $('#MainId').val() + '?type=PeerTechnical';
+            }
+        });
+    }
+
+    function StartReview() {
+        $.confirm({
+            title: 'Start Review',
+            content: 'Are you sure you wish to start the review for this artifact? You will not be able to edit the artifact once the review process is started.',
+            confirmButtonClass: 'btn-primary',
+            cancelButtonClass: 'btn-warning',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                TriggerSaveFunction($('#artifactTabs li.active'));
+                window.location.href = "/Artifact/StartReviews/" + $('#MainId').val() + '?type=Manager';
+            }
+        });
+    }
+
+    function CancelArtifact() {
+        $.confirm({
+            title: 'Cancel Artifact',
+            content: 'Are you sure you wish to Cancel this Artifact and cancel all Reviews? You can restart the Artifact at a later time if you wish.',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-warning',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                TriggerSaveFunction($('#artifactTabs li.active'));
+                window.location.href = "/Artifact/Cancel/" + $('#MainId').val();
+            }
+        });
+    }
+
+    function MarkCompleted() {
+        $.confirm({
+            title: 'Complete Artifact',
+            content: 'Are you sure you wish to mark this DOE or Internal Artifact as Completed. Warning: You will not be able to undo this, or edit the data after this is done.',
+            confirmButtonClass: 'btn-warning',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                TriggerSaveFunction($('#artifactTabs li.active'));
+                window.location.href = "/Artifact/MarkCompleted/" + $('#MainId').val();
+            }
+        });
+    }
+
+    function SendHome() {
+        TriggerSaveFunction($('#artifactTabs li.active'));
+        window.location.href = "/";
+    }
+
+</script>

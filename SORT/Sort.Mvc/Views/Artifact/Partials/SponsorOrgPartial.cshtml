@@ -1,0 +1,102 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.ArtifactModel
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Sponsoring Orginizations</b></p>
+    <p>Enter all sponsoring orginizations. The dropdown list is suggestions, You can enter whatever text you need to.</p>
+</div>
+
+@using (Html.BeginForm("AddSponsor", "Artifact", FormMethod.Post, new { id = "SponsorForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.Hidden("MetaDataId")
+    @Html.Hidden("MetaDataType", MetaDataTypeEnum.SponsoringOrgs.ToString())
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-12">@Html.BsLabelFor(m => m.Sponsor, new {@class = "required col-md-3"})</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-11">
+                    @Html.BsTextBoxFor(m => m.Sponsor, null, Url.Action("SponsorOrgSuggestionSearch", "LookUp"))
+                    @Html.ValidationMessageFor(m => m.Sponsor, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-1">
+                    <button type="button" onclick="AddSponsor()" class="btn btn-sm btn-success">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="SponsorPartial">
+        @Html.Partial("Partials/_sponsorOrgList", Model.SponsoringOrgs)
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        CheckSponsorRequired();
+    });
+
+    function AddSponsor() {
+        var id = $('#SortMainId').val();
+        var sp = $('#Sponsor').val();
+
+        if (id != '' && sp != '') {
+            SetValidationMsg('Sponsor', '');
+            var form = $('#SponsorForm');
+            $('.nav-pills a[href=#sponsorTab]').addClass('saving');
+
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    $("#SponsorPartial").html(data);
+                    CheckSponsorRequired();
+                    $("#Sponsor").val('');
+                })
+                .fail(function (response) { SetValidationMsg('Sponsor', "Unable to Save the Sponsor.  Required fields missing or Invalid."); })
+                .always(function () { $('.nav-pills a[href=#sponsorTab]').removeClass('saving'); });
+
+        } else if (sp == '') {
+            SetValidationMsg('Sponsor', 'Sponsoring Orginization is required');
+        }
+    }
+
+    function RemoveSponsor(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Sponsor',
+            content: 'Are you sure you wish to remove this sponsor?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#sponsorTab]').addClass('saving');
+                $.post("/Artifact/RemoveSponsor",
+                    {
+                        id: row['MetaDataId']
+                    },
+                    function (data) {
+                        $("#SponsorPartial").html(data);
+                        CheckSponsorRequired();
+                    }).fail(function (response) { alert(response.responseText); })
+                    .always(function () { $('.nav-pills a[href=#sponsorTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function CheckSponsorRequired() {
+        if ($('#sponsors >tbody:last >tr').length > 0 &&
+            !$('#sponsors >tbody:last >tr >td').hasClass('dataTables_empty')) {
+            $('.nav-pills a[href=#sponsorTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#sponsorTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

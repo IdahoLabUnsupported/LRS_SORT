@@ -1,0 +1,45 @@
+@model IEnumerable<LRS.Business.UserListObject>
+@{
+    ViewBag.Title = "Users";
+}
+
+<div class="col-md-8">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="pull-left">Users</div>
+            <div class="pull-right">
+                <a href="@Url.Action("EditUser")" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i></a>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+            @Html.Talon().Grid(Model).Name("users").Columns(c =>
+            {
+                c.Bound(m => m.EmployeeId).Width(100);
+                c.Bound(m => m.NameFull).Title("Name");
+                c.Bound(m => m.RoleDisplayString).Title("Role").Width(100);
+                c.Buttons(b =>
+                {
+                    b.Button().Icon("edit").Type("primary").Href(Url.Action("EditUser", new {id = "{EmployeeId}" }));
+                    b.Button("DeleteUser").Icon("times").Type("danger");
+                }).Width(40).AlignCenter();
+            })
+        </div>
+    </div>
+</div>
+
+<script>
+    function DeleteUser(row) {
+        $.confirm({
+            title: 'Delete User',
+            content: 'Are you sure you wish to delete ' + row['NameFull'] + "?",
+            confirmButtonClass: 'btn-success',
+            cancelButtonClass: 'btn-danger',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Admin/DeleteUser/" + row['EmployeeId'];
+            }
+        });
+    }
+</script>

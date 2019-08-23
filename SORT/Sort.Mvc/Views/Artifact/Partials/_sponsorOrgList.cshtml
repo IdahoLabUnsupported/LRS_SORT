@@ -1,0 +1,14 @@
+﻿@model List<Sort.Business.SortMetaDataObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("sponsors").Columns(c =>
+    {
+        c.Bound(m => m.MetaDataId).Hidden();
+        c.Bound(m => m.MetaDataType).Hidden();
+        c.Bound(m => m.Data).Title("Sponsor").Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button("RemoveSponsor").Icon("times").Type("danger").ToolTip("Remove Sponsoring Orginization");
+        }).Width(30).AlignCenter();
+    }).Clean()
+</div>

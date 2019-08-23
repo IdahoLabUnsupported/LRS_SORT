@@ -1,0 +1,100 @@
+﻿@using Sort.Business
+@model SortMainObject
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Conference/Event Paper, Proceedings, or Presentation</b></p>
+    <p>Place enter the information about the Conference/Event where the Paper, Proceedings, or Presentation happened.</p>
+</div>
+
+@using (Html.BeginForm("ConferenceSave", "Artifact", FormMethod.Post, new {id = "ConferenceForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+
+    <div class="row text-nowrap">
+        <div class="col-md-8">@Html.BsLabelFor(m => m.ConferenceName, new {@class = "required col-md-3"})</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @Html.BsTextBoxFor(m => m.ConferenceName, new { @class = "check-required" })
+        </div>
+    </div>
+    <br/>
+
+    <div class="row text-nowrap">
+        <div class="col-md-8">@Html.BsLabelFor(m => m.ConferenceLocation, new {@class = "required col-md-3"})</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @Html.BsTextBoxFor(m => m.ConferenceLocation, new { @class = "check-required" })
+        </div>
+    </div>
+    <br/>
+    
+    <div class="row text-nowrap">
+        <div class="col-md-6">@Html.BsLabelFor(m => m.ConferenceBeginDate, new {@class = "required col-md-3"})</div>
+        <div class="col-md-6">@Html.BsLabelFor(m => m.ConferenceEndDate, new {@class = "required col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            @Html.BsDatePickerFor(m => m.ConferenceBeginDate, new { @class = "check-required" })
+        </div>
+        <div class="col-md-6">
+            @Html.BsDatePickerFor(m => m.ConferenceEndDate, new { @class = "check-required" })
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#ConferenceForm .check-required').change(function () {
+            CheckConferenceRequired();
+        });
+
+        $("#ConferenceBeginDate").closest('.input-group').on("dp.change", function (e) {
+            $('#ConferenceEndDate').closest('.input-group').data("DateTimePicker").minDate(e.date);
+            CheckConferenceRequired();
+        });
+
+        $("#ConferenceEndDate").closest('.input-group').on("dp.change", function (e) {
+            $('#ConferenceBeginDate').closest('.input-group').data("DateTimePicker").maxDate(e.date);
+            CheckConferenceRequired();
+        });
+
+        CheckConferenceRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckConferenceRequired() {
+        var requirMeet = true;
+        $('#ConferenceForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#conferenceTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#conferenceTab]').addClass('required');
+        }
+    }
+
+    function ConferenceSave() {
+        $('.nav-pills a[href=#conferenceTab]').addClass('saving');
+        var form = $('#ConferenceForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#conferenceTab]').removeClass('saving');
+            });
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>
+

@@ -1,0 +1,12 @@
+
+$icon-font-path: "fonts/" !default;
+@import "bootswatch/labcosmo_variables";
+@import "_bootstrap";
+@import "bootswatch/cosmo_bootswatch";
+@import "_LRS";
+
+.navbar .navbar-nav>li>a.user-impersonating {
+    color: $brand-info
+}
+
+@import "_bootstrap-tagsinput";

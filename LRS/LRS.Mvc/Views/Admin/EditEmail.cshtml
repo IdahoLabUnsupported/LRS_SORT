@@ -1,0 +1,204 @@
+﻿@using LRS.Business
+@model LRS.Mvc.Models.EditEmailModel
+
+@{
+    ViewBag.Title = "Edit Email Templates";
+}
+
+<link href="~/Content/summernote.css" rel="stylesheet" />
+
+@using (Html.BeginForm("EditEmail", "Admin", FormMethod.Post, new { id = "MainForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.EmailTemplateId)
+    @Html.HiddenFor(m => m.Body)
+    <div class="col-lg-12">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="pull-left">
+                    <h3 class="panel-title">@ViewBag.Title</h3>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="panel-body">
+                @if (string.IsNullOrWhiteSpace(Model.EmailType))
+                {
+                    <div class="form-group">
+                        @Html.BsLabelFor(m => m.EmailType)
+                        <div class="col-md-9">
+                            @Html.BsDropDownListFor(m => m.EmailType, BsHelper.GetEnumSelectList<EmailTypeEnum>(), "--Select--", new { onchange = "this.form.submit();" })
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="form-group">
+                        @Html.BsLabelFor(m => m.EmailType)
+                        <div class="col-md-9">
+                            @Html.BsDropDownListFor(m => m.EmailType, BsHelper.GetEnumSelectList<EmailTypeEnum>(), "--Select--", new { onchange = "this.form.submit();" })
+                        </div>
+                    </div>
+                    <div class="clearfix"></div><br />
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">Subject Codes</label>
+                        <div class="col-md-9">
+                            <div class="btn-group">
+                                <button class="stampSub btn btn-info btn-sm">{STI_Number}</button>
+                                <button class="stampSub btn btn-info btn-sm">{Title}</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.BsLabelFor(m => m.Header)
+                        <div class="col-md-9">
+                            @Html.BsTextBoxFor(m => m.Header)
+                            @Html.ValidationMessageFor(m => m.Header, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-12" style="min-height: 10px;"></div>
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-2">
+                            @Html.BsCheckBoxFor(m => m.IncludeAuthors, "<b>CC: A Copy to All Authors</b>")
+                            @Html.ValidationMessageFor(m => m.IncludeAuthors, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-9 col-md-offset-2">
+                            @Html.BsCheckBoxFor(m => m.IncludeContacts, "<b>CC: A Copy to Artifact Creator</b>")
+                            @Html.ValidationMessageFor(m => m.IncludeContacts, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="clearfix"></div><br />
+                    <div class="form-group">
+                        <label class="control-label col-sm-2">Body Codes</label>
+                        <div class="col-md-9">
+                            <div class="btn-group">
+                                <button class="stamp btn btn-info btn-sm">{STI_Number}</button>
+                                <button class="stamp btn btn-info btn-sm">{Title}</button>
+                                <button class="stamp btn btn-info btn-sm">{Authors}</button>
+                                <button class="stamp btn btn-info btn-sm">{ReviewStatus}</button>
+                                <button class="stamp btn btn-info btn-sm">{ReviewProgress}</button>
+                                <button class="stamp btn btn-info btn-sm">{Url}</button>
+                                <button class="stamp btn btn-info btn-sm">{RecipientsName}</button>
+                                <button class="stamp btn btn-info btn-sm">{ReviewerName}</button>
+                                <button class="stamp btn btn-info btn-sm">{Comment}</button>
+                                <button class="stamp btn btn-info btn-sm">{ReviewType}</button>
+                                <button class="stamp btn btn-info btn-sm">{OUO-FOIA}</button>
+                                <button class="stamp btn btn-info btn-sm">{FundingOrg}</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        @Html.BsLabelFor(m => m.Body)
+                        <div id="page-content-wrapper" class="col-md-9">
+                            <div id="page-content" class="form-control" style="min-height: 500px;">
+                                @Html.Raw(Model.Body)
+                            </div>
+                            @Html.ValidationMessageFor(m => m.Body, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="col-md-offset-2 col-md-9">
+                        <button type="button" class="btn btn-primary" onclick="Save();">Save</button>
+                        @if (Model.EmailTemplateId.HasValue)
+                        {
+                            <button type="button" class="btn btn-danger" onclick="Delete();">Delete</button>
+                        }
+                        <a href="@Url.Action("Index", "Home")" class="btn btn-default">Cancel</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<script src="~/Scripts/summernote.min.js"></script>
+<script>
+    $(function() {
+
+        $('#page-content').summernote({ focus: true, height: 500 });
+        $('.floating-buttons').css('display', 'none');
+        $('.inline-buttons').slideDown(250);
+    });
+
+    function Save() {
+        var header = $('#Header').val();
+        var body = $('#page-content').code();
+        if (header != '' && body != '') {
+            SetValidationMsg('Header', '');
+            SetValidationMsg('Body', '');
+
+            $("#Body").val(body);
+            $('#page-content').destroy();
+            $('.floating-buttons').show();
+            $('.inline-buttons').slideUp(250);
+
+            $.post("/Admin/SaveEmail/",
+                $('#MainForm').serialize(),
+                function(data) {
+                    if (data != null && data.saved == true) {
+                        $('#EmailTemplateId').val(data.id);
+                        BootstrapDialog.show({
+                            title: 'Email Template was saved',
+                            type: BootstrapDialog.TYPE_SUCCESS,
+                            message: 'Email Template was successfully Saved.',
+                            buttons: [{
+                                label: 'Ok',
+                                cssClass: 'btn-default',
+                                action: function (dialogRef) {
+                                    location.reload(true);
+                                }
+                            }]
+                        });
+                    } else {
+                        alert("there was an error saving the Template!");
+                    }
+                }).fail(function (response) { alert("there was an error saving the Template!"); });
+
+        } else {
+            if (header == '') {
+                SetValidationMsg('Header', 'Header is required');
+            } else {
+                SetValidationMsg('Header', '');
+            }
+            if (body == '') {
+                SetValidationMsg('Body', 'Body is required');
+            } else {
+                SetValidationMsg('Body', '');
+            }
+        }
+    }
+
+    function Delete() {
+        $.confirm({
+            title: 'Delete Email Template',
+            content: 'Are you sure you wish to delete this email template. Warning: All Emails that would go out on this template will no longer be sent until this email template is re-added.',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-default',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Admin/DeleteEmail/" + $('#EmailTemplateId').val();
+            }
+        });
+    }
+
+    $(".stamp").click(function() {
+        var selection = $(".note-editable");
+
+        var toInsert = $(this).text();
+        selection.append("<p>" + toInsert + "</p>");
+        return false;
+    });
+
+    $(".stampSub").click(function () {
+        var header = $('#Header').val();
+        var toInsert = $(this).text();
+
+        $('#Header').val(header + toInsert);
+        return false;
+    });
+
+    function SetValidationMsg(control, msg) {
+        $('[data-valmsg-for="' + control + '"]').html(msg);
+    }
+</script>

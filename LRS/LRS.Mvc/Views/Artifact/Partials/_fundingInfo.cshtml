@@ -1,0 +1,153 @@
+﻿@model LRS.Business.FundingObject
+
+<div class="modal fade" id="dvFundingInfo" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="modalTitleAddComment">Funding Info</h4>
+            </div>
+            <div class="modal-body">
+                <div class="panel-body form-horizontal">
+
+                    <div class="row text-nowrap">
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.Year)</div>
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.FundingType)</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.Year, new { @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.FundingType, new { @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    <div class="row text-nowrap">
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.ContractNumber)</div>
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.PercentFmt)</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.ContractNumber, new { @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.PercentFmt, new { @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    <div class="row text-nowrap">
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.FundingOrgName)</div>
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.ProjectArea)</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.FundingOrgName, new { @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.ProjectArea, new { @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    @switch (Model.FundingTypeId)
+                    {
+                        case 1://DOE
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.DoeFundingCategory)</div>
+                                @if (Model.DoeFundingCategoryId == 4) //Nuclear Energy (NE)
+                                {
+                                    <div class="col-md-6">@Html.BsLabelFor(m => m.MilestoneTrackingNumber)</div>
+                                }
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.DoeFundingCategory, new { @readonly = "readonly" })
+                                </div>
+                                @if (Model.DoeFundingCategoryId == 4) //Nuclear Energy (NE)
+                                {
+                                    <div class="col-md-6">
+                                        @Html.BsTextBoxFor(m => m.MilestoneTrackingNumber, new { @readonly = "readonly" })
+                                    </div>
+                                }
+                            </div>
+                            break;
+                        case 2://Laboratory Directed Research and Development
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.TrackingNumber)</div>
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.ProjectNumber)</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.TrackingNumber, new { @readonly = "readonly" })
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.ProjectNumber, new { @readonly = "readonly" })
+                                </div>
+                            </div>
+
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.PrincipalInvName)</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.PrincipalInvName, new { @readonly = "readonly" })
+                                </div>
+                            </div>
+                            break;
+                        case 4: //Other
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.OtherDescription)</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.OtherDescription, new { @readonly = "readonly" })
+                                </div>
+                            </div>
+                            break;
+                        case 5: //Strategic Partnership Project
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.SppFundingName)</div>
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.SppApprovedDisplay)</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.SppFundingName, new { @readonly = "readonly" })
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.SppApprovedDisplay, new { @readonly = "readonly" })
+                                </div>
+                            </div>
+
+                            if (Model.SppApproved.HasValue && !Model.SppApproved.Value)
+                            {
+                                <div class="row text-nowrap">
+                                    <div class="col-md-6">@Html.BsLabelFor(m => m.ApproveNoReason)</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        @Html.BsTextBoxFor(m => m.ApproveNoReason, new { @readonly = "readonly" })
+                                    </div>
+                                </div>
+                            }
+                            break;
+                        case 6: //Grant
+                        case 7: //Nuclear Energy University Program
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.GrantNumber)</div> @**Grant, Nuclear Energy*@
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.GrantNumber, new { @readonly = "readonly" })
+                                </div>
+                            </div>
+                            break;
+                    }
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

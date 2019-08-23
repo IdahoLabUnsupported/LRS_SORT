@@ -1,0 +1,31 @@
+﻿@using LRS.Mvc.Classes
+@model List<LRS.Business.FundingTypeObject>
+@{
+    ViewBag.Title = "Funding Types";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <div class="pull-left">@ViewBag.Title</div>
+                <div class="pull-right">
+                    <a href="@Url.Action("EditFundingType")" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i></a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="panel-body panel-grid">
+            @(Html.Talon().Grid(Model).Name("FundingTypeTable").Columns(c =>
+                      {
+                          c.Bound(x => x.FundingTypeId).Hidden();
+                          c.Bound(x => x.FundingType).Order().Title("Funding Type").Href(Url.Action("EditFundingType", "Lookup", new { id = "{FundingTypeId}" }));
+                          c.Bound(x => x.Description).Title("Description");
+                          c.Bound(x => x.Active).Width(100);
+                      }))
+        </div>
+    </div>
+</div>

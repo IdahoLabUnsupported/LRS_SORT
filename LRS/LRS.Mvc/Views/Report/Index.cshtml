@@ -1,0 +1,686 @@
+﻿@using LRS.Business
+@using LRS.EmployeeHelper
+@model LRS.Mvc.Models.ReportModel
+
+@{
+    ViewBag.Title = "Report";
+}
+
+<style>
+    .chosen-container-multi {
+        width: 100% !important;
+    }
+</style>
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Report</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="panel-body form-horizontal">
+                <div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+                    <p>Set Values only for criteria you wish to filter by. The more criteria, the smaller the list of matching Artifacts will be.</p>
+                    <p>* Dates are searched between the [Greater Than] and [Less Than] Range.</p>
+                    <p>* [Like] - Searches for text is contained withing the data.</p>
+                    <p>* [Exact] - Text must be an exact match.</p>
+                </div>
+
+                <div class="general">
+
+                    @*Row*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.SearchDateType, new { @class = "required control-label col-sm-2" })</div>
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.StartTime, new { @class = "required control-label col-sm-2" })</div>
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.EndTime, new { @class = "required control-label col-sm-2" })</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            @Html.BsDropDownListFor(m => m.SearchDateType, BsHelper.GetEnumSelectList<SearchDates>())
+                        </div>
+                        <div class="col-md-4">
+                            @Html.BsDateTimePickerFor(m => m.StartTime).TodayButton(true)
+                            @Html.ValidationMessageFor(model => model.StartTime, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.BsDateTimePickerFor(m => m.EndTime).TodayButton(true)
+                            @Html.ValidationMessageFor(model => model.EndTime, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    @*Row*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.Status, new { @class = "control-label col-sm-2" })</div>
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.DocumentType, new { @class = "control-label col-sm-2" })</div>
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.Owner, new { @class = "control-label col-sm-2" })</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            @Html.BsDropDownListFor(m => m.Status, BsHelper.GetEnumSelectList<StatusEnum>(), " --Select-- ")
+                        </div>
+
+                        <div class="col-md-4">
+                            @Html.BsDropDownListFor(m => m.DocumentType, Extensions.GetEnumSelectList<DocumentTypeEnum>(new[] { (Current.IsDoeUser ? "" : "DoeID"), (Current.IsHistorical ? "" : "Historical") }), " --Select-- ")
+                        </div>
+
+                        <div class="col-md-4">
+                            @Html.EmployeeFor(m => m.Owner, Url.Action("SearchEmployees", "Lookup"))
+                        </div>
+                    </div>
+
+                    @*Row*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-4">@Html.BsLabelFor(m => m.StiNumber, new { @class = "control-label col-sm-2" })</div>
+                        <div class="col-md-2">@Html.BsLabelFor(m => m.Revision, new { @class = "control-label col-sm-2" })</div>
+                        <div class="col-md-6">@Html.BsLabelFor(m => m.Title, new { @class = "control-label col-sm-2" })</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            @Html.BsTextBoxFor(m => m.StiNumber)
+                        </div>
+
+                        <div class="col-md-2">
+                            @Html.BsInputMaskFor(m => m.Revision, InputMaskFormat.Integer)
+                        </div>
+
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.Title)
+                        </div>
+
+
+                    </div>
+
+                    @*Row*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-2">@Html.BsLabelFor(m => m.SubjectId, new { @class = "control-label col-sm-2" })</div>
+                        <div class="col-md-offset-4 col-md-2">@Html.BsLabelFor(m => m.Keyword, new { @class = "control-label col-sm-2" })</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            @Html.BsDropDownListFor(m => m.SubjectId, MemoryCache.SubjectCategoryList(), " --Select-- ")
+                        </div>
+                        <div class="col-md-6">
+                            @Html.BsTextBoxFor(m => m.Keyword)
+                        </div>
+                    </div>
+                    
+                    @*Row*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-2">@Html.BsLabelFor(m => m.CoreCapabilityId, new { @class = "control-label col-sm-2" })</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            @Html.BsDropDownListFor(m => m.CoreCapabilityId, MemoryCache.CoreCapabilitiesList(false), " --Select-- ")
+                        </div>
+                    </div>
+
+                    @*Contact*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-12">
+                            <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchContact)</div>
+                            <div class="pull-left">@Html.Label("Search Contact Info", new { @class = "control-label col-sm-2" })</div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div id="ContactDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-5">@Html.BsLabelFor(m => m.Contact, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                @Html.EmployeeFor(m => m.Contact, Url.Action("SearchEmployees", "Lookup"))
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+
+                    @*Author*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-12">
+                            <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchAuthor)</div>
+                            <div class="pull-left">@Html.Label("Search Author Info", new { @class = "control-label col-sm-2" })</div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div id="AuthorDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-5">@Html.BsLabelFor(m => m.Author, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.Affiliation, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-3">@Html.BsLabelFor(m => m.OrcidId, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                @Html.BsTextBoxFor(m => m.Author)
+                            </div>
+
+                            <div class="col-md-4">
+                                @Html.BsTextBoxFor(m => m.Affiliation)
+                            </div>
+
+                            <div class="col-md-3">
+                                @Html.BsTextBoxFor(m => m.OrcidId)
+                            </div>
+                        </div>
+                        <div class="row text-nowrap">
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.AuthorWorkOrg, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.AuthorCountryId, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.AuthorStateId, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                @Html.BsMultipleChosenFor(m => m.AuthorWorkOrg, Model.OrgList)
+                            </div>
+                            <div class="col-md-4">
+                                @Html.BsMultipleChosenFor(m => m.AuthorCountryId, MemoryCache.CountryList(false))
+                            </div>
+                            <div class="col-md-4">
+                                @Html.BsMultipleChosenFor(m => m.AuthorStateId, MemoryCache.StateList(false))
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                    
+                    @*Reviewer*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-12">
+                            <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchReviewer)</div>
+                            <div class="pull-left">@Html.Label("Search Reviewer Info", new { @class = "control-label col-sm-2" })</div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div id="ReviewerDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-5">@Html.BsLabelFor(m => m.Reviewer, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                @Html.EmployeeFor(m => m.Reviewer, Url.Action("SearchEmployees", "Lookup"))
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+
+                    @*Funding*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-12">
+                            <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchFunding)</div>
+                            <div class="pull-left">@Html.Label("Search Funding Info", new { @class = "control-label col-sm-2" })</div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div id="FundingDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-2">@Html.BsLabelFor(m => m.FundingYear, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.FundingTypeId, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-2">@Html.BsLabelFor(m => m.ContractNumber, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.FundingOrg, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2">
+                                @Html.BsTextBoxFor(m => m.FundingYear)
+                            </div>
+                            <div class="col-md-4">
+                                @Html.BsDropDownListFor(m => m.FundingTypeId, MemoryCache.FundingTypeList(true, Model.FundingTypeId), " --Select-- ")
+                            </div>
+                            <div class="col-md-2">
+                                @Html.BsTextBoxFor(m => m.ContractNumber)
+                            </div>
+                            <div class="col-md-4">
+                                @Html.BsMultipleChosenFor(m => m.FundingOrg, Model.OrgList)
+                            </div>
+                        </div>
+
+                        <div id="GrantDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-3">@Html.BsLabelFor(m => m.GrantNumber, new { @class = "col-md-3" })</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    @Html.BsTextBoxFor(m => m.GrantNumber)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="DoeDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-5">@Html.BsLabelFor(m => m.DoeFundingCategoryId, new { @class = "col-md-3" })</div>
+                                <div class="col-md-5">@Html.BsLabelFor(m => m.MilestoneTrackingNumber, new { @class = "milestonetrack col-md-3", @hidden = "hidden" })</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-5">
+                                    @Html.BsDropDownListFor(m => m.DoeFundingCategoryId, MemoryCache.DoeFundingList(false), " --Select --")
+                                </div>
+                                <div class="col-md-5">
+                                    @Html.BsTextBoxFor(m => m.MilestoneTrackingNumber, new { @class = "milestonetrack", @hidden = "hidden" })
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="LdrdDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-3">@Html.BsLabelFor(m => m.TrackingNumber, new { @class = "col-md-3" })</div>
+                                <div class="col-md-3">@Html.BsLabelFor(m => m.ProjectNumber, new { @class = "col-md-3" })</div>
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.PrincipalInvEmployeeId, new { @class = "col-md-3" })</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-3">
+                                    @Html.BsTextBoxFor(m => m.TrackingNumber)
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.BsTextBoxFor(m => m.ProjectNumber)
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.EmployeeFor(m => m.PrincipalInvEmployeeId, Url.Action("SearchEmployees", "Lookup"))
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="SppDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-5">@Html.BsLabelFor(m => m.SppCategoryId, new { @class = "col-md-3" })</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    @Html.BsDropDownListFor(m => m.SppCategoryId, MemoryCache.SppFundingList(false), " --Select-- ")
+                                </div>
+                                <div class="col-md-3">
+                                    @Html.BsCheckBoxFor(m => m.SppApproved, "SPP Is Approved")
+                                </div>
+                            </div>
+                            <br />
+
+                            <div class="row text-nowrap">
+                                <div class="col-md-4 spp-approve">@Html.BsLabelFor(m => m.ApproveNoReason, new { @class = "col-md-3" })</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 spp-approve">
+                                    @Html.BsTextBoxFor(m => m.ApproveNoReason)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="SppFaDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.FederalAgencyId, new { @class = "col-md-3" })</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsDropDownListFor(m => m.FederalAgencyId, MemoryCache.SppFundingFederalAgenciesList(false), " --Select-- ")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="SppOtherDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-4">@Html.BsLabelFor(m => m.OtherDescription, new { @class = "col-md-3" })</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @Html.BsTextBoxFor(m => m.OtherDescription)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="SppForeignDiv" hidden>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-5">@Html.BsLabelFor(m => m.SppCountryId, new { @class = "col-md-3" })</div>
+                                <div class="col-md-5">@Html.BsLabelFor(m => m.SppAdditionalInfo, new { @class = "col-md-3" })</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-5">
+                                    @Html.BsDropDownListFor(m => m.SppCountryId, MemoryCache.CountryList(false), " --Select-- ")
+                                </div>
+                                <div class="col-md-7">
+                                    @Html.BsTextBoxFor(m => m.SppAdditionalInfo)
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+
+                    @*Intellectual Property*@
+                    <div class="row text-nowrap">
+                        <div class="col-md-12">
+                            <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchIntellectual)</div>
+                            <div class="pull-left">@Html.Label("Search Intellectual Property", new { @class = "control-label col-sm-2" })</div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    <div id="IntellectualDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.IdrNumber, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.DocketNumber, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-4">@Html.BsLabelFor(m => m.IntellectTitle, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                @Html.BsTextBoxFor(m => m.IdrNumber)
+                            </div>
+
+                            <div class="col-md-4">
+                                @Html.BsTextBoxFor(m => m.DocketNumber)
+                            </div>
+
+                            <div class="col-md-4">
+                                @Html.BsTextBoxFor(m => m.IntellectTitle)
+                            </div>
+                        </div>
+                        <div class="row text-nowrap">
+                            <div class="col-md-5">@Html.BsLabelFor(m => m.Aty, new { @class = "control-label col-sm-2" })</div>
+                            <div class="col-md-5">@Html.BsLabelFor(m => m.Ae, new { @class = "control-label col-sm-2" })</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                @Html.EmployeeFor(m => m.Aty, Url.Action("SearchEmployees", "Lookup"))
+                            </div>
+                            <div class="col-md-5">
+                                @Html.EmployeeFor(m => m.Ae, Url.Action("SearchEmployees", "Lookup"))
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+
+                    @*Conference*@
+                    <div id="ConferenceDiv" style="display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-12">
+                                <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchConference)</div>
+                                <div class="pull-left">@Html.Label("Search Conference Info", new { @class = "control-label col-sm-2" })</div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div id="ConferenceSelectDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.ConferenceName, new { @class = "control-label col-sm-2" })</div>
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.ConferenceSponsor, new { @class = "control-label col-sm-2" })</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.ConferenceName)
+                                </div>
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.ConferenceSponsor)
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row text-nowrap">
+                                <div class="col-md-4">@Html.BsLabelFor(m => m.ConferenceLocation, new { @class = "control-label col-sm-2" })</div>
+                                <div class="col-md-4">@Html.BsLabelFor(m => m.ConferenceStart, new { @class = "control-label col-sm-2" })</div>
+                                <div class="col-md-4">@Html.BsLabelFor(m => m.ConferenceEnd, new { @class = "control-label col-sm-2" })</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    @Html.BsTextBoxFor(m => m.ConferenceLocation)
+                                </div>
+                                <div class="col-md-4">
+                                    @Html.BsDatePickerFor(m => m.ConferenceStart)
+                                </div>
+                                <div class="col-md-4">
+                                    @Html.BsDatePickerFor(m => m.ConferenceEnd)
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+
+                    @*Journal*@
+                    <div id="JournalDiv" style="display: none;">
+                        <div class="row text-nowrap">
+                            <div class="col-md-12">
+                                <div class="pull-left" style="margin-left: 15px; margin-top: 12px;">@Html.CheckBoxFor(m => m.SearchJournal)</div>
+                                <div class="pull-left">@Html.Label("Search Journal Info", new { @class = "control-label col-sm-2" })</div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div>
+                        <div id="JournalSelectDiv" class="col-md-12" style="border: 1px solid gray; padding: 5px; margin: 5px; display: none;">
+                            <div class="row text-nowrap">
+                                <div class="col-md-6">@Html.BsLabelFor(m => m.JournalName, new { @class = "control-label col-sm-2" })</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @Html.BsTextBoxFor(m => m.JournalName)
+                                </div>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 15px;">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary">Generate Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#StartTime').closest('.input-group').data("DateTimePicker").sideBySide(true);
+        $('#EndTime').closest('.input-group').data("DateTimePicker").sideBySide(true);
+        $("#StartTime").closest('.input-group').on("dp.change", function (e) {
+            // Set the Date Off min date to the current Date On date/time
+            $('#EndTime').closest('.input-group').data("DateTimePicker").minDate(e.date);
+        });
+        $("#EndTime").closest('.input-group').on("dp.change", function (e) {
+            // Set the Date On Max Date to the current Date Off date/time
+            $('#StartTime').closest('.input-group').data("DateTimePicker").maxDate(e.date);
+        });
+
+        Setup();
+
+        $("#SearchContact").change(function () {
+            if ($("#SearchContact").is(':checked') === true) {
+                $("#ContactDiv").show();
+            } else {
+                $("#ContactDiv").hide();
+            }
+        });
+
+        $("#SearchReviewer").change(function () {
+            if ($("#SearchReviewer").is(':checked') === true) {
+                $("#ReviewerDiv").show();
+            } else {
+                $("#ReviewerDiv").hide();
+            }
+        });
+
+        $("#SearchAuthor").change(function () {
+            if ($("#SearchAuthor").is(':checked') === true) {
+                $("#AuthorDiv").show();
+            } else {
+                $("#AuthorDiv").hide();
+            }
+        });
+
+        $('#SearchIntellectual').change(function() {
+            if ($("#SearchIntellectual").is(':checked') === true) {
+                $("#IntellectualDiv").show();
+            } else {
+                $("#IntellectualDiv").hide();
+            }
+        });
+
+        $("#SearchFunding").change(function () {
+            if ($("#SearchFunding").is(':checked') === true) {
+                $("#FundingDiv").show();
+            } else {
+                $("#FundingDiv").hide();
+            }
+        });
+
+        $('#FundingTypeId').change(function () {
+            ClearGrant();
+            ClearDoe();
+            ClearLdrd();
+            ClearSpp();
+            switch ($('#FundingTypeId').val()) {
+            case '1': //DOE
+                $('#DoeDiv').show();
+                break;
+            case '2': //LDRD
+                $('#LdrdDiv').show();
+                break;
+            case '4': //Other
+                $('#SppOtherDiv').show();
+                break;
+            case '5': //SPP
+                $('#SppDiv').show();
+                break;
+            case '6': //Grant
+            case '7': //NEUP
+                $('#GrantDiv').show();
+                break;
+            }
+        });
+
+        $('#SppCategoryId').change(function () {
+            ClearSppFa();
+            ClearSppOther();
+            ClearSppForeign();
+            switch ($('#SppCategoryId').val()) {
+            case '1'://Federal Agency
+                $('#SppFaDiv').show();
+                break;
+            case '6'://Other
+                $('#SppOtherDiv').show();
+                break;
+            case '7'://Foreign
+                $('#SppForeignDiv').show();
+                break;
+            };
+
+        });
+
+        $('#SppApproved').change(function () {
+            if (this.checked) {
+                $('.spp-approve').hide();
+            } else {
+                $('.spp-approve').show();
+            }
+        });
+
+        $("#DoeFundingCategoryId").change(function () {
+            if ($("#DoeFundingCategoryId").val() == '4') {
+                $('.milestonetrack').show();
+            } else {
+                $('.milestonetrack').hide();
+            }
+        });
+
+        $('#DocumentType').change(function () {
+            $('#ConferenceDiv').hide();
+            $('#JournalDiv').hide();
+            $('#SearchConference').prop('checked', false).trigger('change');
+            $('#SearchJournal').prop('checked', false).trigger('change');
+            switch ($('#DocumentType').val()) {
+                case 'Conference':
+                    $('#ConferenceDiv').show();
+                    break;
+                case 'Journal':
+                    $('#JournalDiv').show();
+                    break;
+            };
+        });
+        
+        $('#SearchConference').change(function () {
+            if ($("#SearchConference").is(':checked') === true) {
+                $("#ConferenceSelectDiv").show();
+            }
+            else {
+                $("#ConferenceSelectDiv").hide();
+            }
+        });
+
+        $('#SearchJournal').change(function () {
+            if ($("#SearchJournal").is(':checked') === true) {
+                $("#JournalSelectDiv").show();
+            }
+            else {
+                $("#JournalSelectDiv").hide();
+            }
+        });
+
+        $('#DocumentType').trigger("change");
+    });
+
+    function Setup() {
+        if ($("#SearchContact").is(':checked') === true) {
+            $("#ContactDiv").show();
+        }
+        if ($("#SearchAuthor").is(':checked') === true) {
+            $("#AuthorDiv").show();
+        }
+        if ($("#SearchReviewer").is(':checked') === true) {
+            $("#ReviewerDiv").show();
+        }
+        if ($("#SearchFunding").is(':checked') === true) {
+            $("#FundingDiv").show();
+        }
+        if ($("#SearchIntellectual").is(':checked') === true) {
+            $("#IntellectualDiv").show();
+        }
+    }
+
+    function ClearGrant() {
+        $('#GrantDiv').hide();
+        $('#GrantNumber').val('');
+    }
+
+    function ClearDoe() {
+        $('#DoeDiv').hide();
+        $("#DoeFundingCategoryId").find('option').attr("selected", false).trigger('change');
+    }
+
+    function ClearLdrd() {
+        $('#LdrdDiv').hide();
+        $('#TrackingNumber').val('');
+        $('#ProjectNumber').val('');
+        $('#PrincipalInvEmployeeId').val('');
+    }
+
+    function ClearSpp() {
+        ClearSppFa();
+        ClearSppOther();
+        ClearSppForeign();
+        $('#SppDiv').hide();
+        $("#SppCategoryId").find('option').attr("selected", false);
+        $('#SppApproved').attr('checked', false);
+        $('.spp-approve').show();
+        $('#ApproveNoReason').val('');
+    }
+
+    function ClearSppFa() {
+        $('#SppFaDiv').hide();
+        $("#FederalAgencyId").find('option').attr("selected", false);
+    }
+
+    function ClearSppOther() {
+        $('#SppOtherDiv').hide();
+        $("#OtherDescription").val('');
+    }
+
+    function ClearSppForeign() {
+        $('#SppForeignDiv').hide();
+        $("#SppCountryId").find('option').attr("selected", false);
+        $("#SppAdditionalInfo").val('');
+    }
+</script>

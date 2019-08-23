@@ -1,0 +1,103 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.ArtifactModel
+    
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Subject</b></p>
+    <p>The DOE Office of Sciencific and Technical Information (OSTI) requires identification of subject category(ies) from this list. One or more must be selected. (NOTE: These subject categories are provided by DOE -- not INL). Select the one(s) that most closely relates to your subject matter. Category 99 can be used if none of the others apply.</p>
+    <p>Click <a href="@Url.Action("SubjectCategoryDefinitions", "Lookup")">here</a> to download the subject category definitions.</p>
+</div>
+
+@using (Html.BeginForm("AddSubject", "Artifact", FormMethod.Post, new {id = "SubjectForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.Hidden("MetaDataId")
+    @Html.Hidden("MetaDataType", MetaDataTypeEnum.SubjectCategories.ToString())
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-12">@Html.BsLabelFor(m => m.SubjectId, new { @class = "required col-md-3" })</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-11">
+                    @Html.BsDropDownListFor(m => m.SubjectId, MemoryCache.SubjectCategoryList(), " --Select-- ")
+                    @Html.ValidationMessageFor(m => m.SubjectId, "", new {@class = "text-danger"})
+                </div>
+                <div class="col-md-1">
+                    <button type="button" onclick="AddSubject()" class="btn btn-sm btn-success">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div id="SubjectPartial">
+    @Html.Partial("Partials/_subjectList", Model.SubjectCategories)
+</div>
+
+<script>
+    $(document).ready(function () {
+        CheckSubjectRequired();
+    });
+
+    function AddSubject() {
+        var id = $('#Sort_SortMainId').val();
+        var sbid = $('#SubjectId').val();
+
+        if (id != '' && sbid != '') {
+            SetValidationMsg('SubjectId', '');
+            var form = $('#SubjectForm');
+            $('.nav-pills a[href=#subjectTab]').addClass('saving');
+
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    $("#SubjectPartial").html(data);
+                    CheckSubjectRequired();
+                    $("#SubjectId").find('option').attr("selected", false);
+                })
+                .fail(function (response) { SetValidationMsg('SubjectId', "Unable to Save the Subject.  Required fields missing or Invalid."); })
+                .always(function () { $('.nav-pills a[href=#subjectTab]').removeClass('saving'); });
+
+        } else if (sbid == '') {
+            SetValidationMsg('SubjectId', 'Subject is required');
+        }
+    }
+
+    function RemoveSubject(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Subject',
+            content: 'Are you sure you wish to remove this subject?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#subjectTab]').addClass('saving');
+                $.post("/Artifact/RemoveSubject",
+                    {
+                        id: row['MetaDataId']
+                    },
+                    function(data) {
+                        $("#SubjectPartial").html(data);
+                        CheckSubjectRequired();
+                    }).fail(function (response) { alert(response.responseText); })
+                    .always(function () { $('.nav-pills a[href=#subjectTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function CheckSubjectRequired() {
+        if ($('#subjects >tbody:last >tr').length > 0 &&
+            !$('#subjects >tbody:last >tr >td').hasClass('dataTables_empty')) {
+            $('.nav-pills a[href=#subjectTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#subjectTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

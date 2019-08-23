@@ -1,0 +1,234 @@
+﻿@model LRS.Mvc.Models.AttachmentModel
+
+@*Modal View for Add Attachment*@
+<div class="modal fade" id="dvAddAttachments" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="modalTitleAddParticipant">Upload Attachments</h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Attachment Information</h3>
+                    </div>
+                    <div class="panel-body form-horizontal">
+                        <div>
+                            <div class="form-group col-md-12">
+                                @using (Html.BeginForm("SaveAdminAttachment", "Artifact", FormMethod.Post, new { enctype = "multipart/form-data", id = "AttachmentForm", @onsubmit = "return false" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    @Html.HiddenFor(m => m.MainId)
+                                    @Html.Hidden("Filename")
+                                    @Html.Hidden("Size")
+                                    @Html.Hidden("AdminOnly", true)
+
+                                    <div class="panel-group">
+                                        <div class="row text-nowrap">
+                                            <div class="col-md-2">@Html.BsLabelFor(m => m.AttachmentNote, new { @class = "required col-md-3" })</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                @Html.BsTextAreaFor(m => m.AttachmentNote)
+                                                @Html.ValidationMessageFor(m => m.AttachmentNote, "", new { @class = "text-danger" })
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                }
+
+                                <div class="panel-group">
+                                    <div class="row text-nowrap">
+                                        <div class="col-md-2">@Html.BsLabelFor(m => m.File, new { @class = "required col-md-3" })</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            @Html.BsFileUploadFor(m => m.File, new string[] {"docx", "doc", "rtf", "txt", "dot", "dotx", "docm", "xlsx", "xls", "xlsb", "xlsm", "csv", "ods", "odc", "odp", "ods", "odt", "one", "ppsx",
+                                                "ppt", "pptx", "pptm", "pub", "pdf", "zip", "rar", "vdw", "vdx", "vsd", "vsdm", "vsdx", "vst", "vstm", "vstx", "jpg", "jpeg", "tiff", "gif", "bmp", "ico",
+                                                "png", "img", "pcx", "mkv", "flv", "avi", "mov", "qt", "wmv", "gifv", "mp4", "m4p", "m4v", "mpg", "mpeg", "m2v", "flv", "f4v", "f4p", "f4a", "f4b"
+                                            })
+                                            @Html.ValidationMessageFor(m => m.File, "", new { @class = "text-danger" })
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel-group">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="progressbar_container" style="width: 100%; height: 30px; position: relative; background-color: grey; display: none">
+                                                <div id="progressbar" style="width: 0%; height: 100%; position: absolute; background-color: green"></div>
+                                                <span id="progressbar_label" style="position: absolute; left: 49%; top: 20%; color: white;">Uploading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                @*<button type="submit" class="btn btn-primary">Add</button>*@
+                <button type="button" value="@Model.MainId" onclick="AddAttachment();" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#AttachmentForm").submit(function (event) {
+            if (CheckAttachmentRequiredMeet() !== true) {
+                event.preventDefault();
+            }
+        });
+
+        $('#File').change(function (e) {
+            if (e != null && e.target != null) {
+                file = e.target.files[0];
+            }
+        });
+    });
+
+    var file = null;
+
+    function CheckAttachmentRequiredMeet() {
+        var isValid = true;
+
+        if ($('#MainId').val() == '' || $('#MainId').val() == '0') return false;
+
+        if ($('#AttachmentNote').val() == '') {
+            isValid = false;
+            SetValidationMsg('AttachmentNote', 'Description is required');
+        } else {
+            SetValidationMsg('AttachmentNote', '');
+        }
+        
+        if ($('#File').val() == '' || file === null) {
+            isValid = false;
+            SetValidationMsg('File', 'File is required');
+        } else {
+            if (file.size > 2048000000) {
+                isValid = false;
+                SetValidationMsg('File', 'File size is to large to upload, Max size is 2GB.');
+            } else {
+                SetValidationMsg('File', '');
+            }
+        }
+
+        return isValid;
+    }
+
+    function SetValidationMsg(control, msg) {
+        $('[data-valmsg-for="' + control + '"]').html(msg);
+    }
+
+    function AddAttachment() {
+        if (CheckAttachmentRequiredMeet() === true) {
+            $('#Filename').val(file.name);
+            $('#Size').val(file.size);
+
+            var form = $('#AttachmentForm');
+            
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    if (data != null && data > 0) {
+                        UploadFile(data);
+                    } else {
+                        alert("Unable to Save the Attachment.  Something went wrong saving the attachment.");
+                    }
+                })
+                .fail(function (response) { alert("Unable to Save the Attachment.  Required fields missing or Invalid."); })
+        }
+    }
+
+    function ClearAttachmentData() {
+        ClearAllValidationMsgs();
+        file = null;
+        $('#File').val('').trigger('change');
+        $('#Filename').val('');
+        $('#Size').val('');
+        $('#AttachmentNote').val('');
+        $('#addAttachmentBtn').prop("disabled", false);
+        $("#dvAddAttachments").modal('hide');
+    }
+
+    
+    function ClearAllValidationMsgs() {
+        SetValidationMsg('AttachmentNote', '');
+        SetValidationMsg('File', '');
+    }
+
+    // File Upload Region
+    function progressBarStart() {
+        $("#progressbar_container").show();
+    }
+
+    function progressBarUpdate(percentage) {
+        percentage = Math.round(percentage);
+        $('#progressbar_label').html(percentage + "%");
+        $("#progressbar").width(percentage + "%");
+    }
+
+    function progressBarComplete() {
+        $("#progressbar_container").fadeOut(500);
+        if ($.isFunction(window.LoadAdminAttachmentsPartial)) {
+            window.LoadAdminAttachmentsPartial($('#MainId').val());
+        }
+        ClearAttachmentData();
+    }
+
+    function multiUpload(attachmentId, count, counter, blob, completed, start, end, bytesPerChunk) {
+        try {
+            counter = counter + 1;
+            if (counter <= count) {
+                var chunk = blob.slice(start, end);
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                    start = end;
+                    end = start + bytesPerChunk;
+                    if (count == counter) {
+                        progressBarUpdate(100);
+                        progressBarComplete();
+                    } else {
+                        var percentage = (counter / count) * 100;
+                        progressBarUpdate(percentage);
+                        multiUpload(attachmentId, count, counter, blob, completed, start, end, bytesPerChunk);
+                    }
+                }
+                xhr.open("POST", "/Artifact/AttachmentMultiUpload?id=" + attachmentId + "&partNum=" + counter, true);
+                xhr.send(chunk);
+            }
+        } catch (err) {
+            alert("Error while adding attachment.  Please make sure the file is not open by another application and try again.");
+            progressBarComplete();
+        }
+    }
+
+    function UploadFile(attachmentId) {
+        $('#addAttachmentBtn').prop("disabled", true);
+        try {
+            var blob = file;
+            var bytesPerChunk = 10240000; // cut the file into 10Meg chunks
+            var size = blob.size;
+
+            var start = 0;
+            var end = bytesPerChunk;
+            var completed = 0;
+            var count = size % bytesPerChunk == 0 ? size / bytesPerChunk : Math.floor(size / bytesPerChunk) + 1;
+            var counter = 0;
+            progressBarStart();
+            multiUpload(attachmentId, count, counter, blob, completed, start, end, bytesPerChunk);
+        } catch (err) {
+            alert("Error while adding attachment.  Please make sure the file is not open by another application and try again.");
+            progressBarComplete();
+        }
+    }
+
+    //End File Upload Region
+</script>

@@ -1,0 +1,145 @@
+﻿@using Sort.Business
+@using Sort.EmployeeHelper
+@model Sort.Mvc.Models.IContact
+ 
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Contacts</b></p>
+    <p>You must have at least one POC (Point of Contact).</p>
+</div>
+
+@using (Html.BeginForm("AddContact", "Artifact", FormMethod.Post, new {id = "ContactForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.HiddenFor(m => m.ContactId)
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-5">@Html.BsLabelFor(m => m.EmployeeId, new {@class = "required col-md-3"})</div>
+                <div class="col-md-4">@Html.BsLabelFor(m => m.ContactType, new {@class = "required col-md-3"})</div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    @Html.EmployeeFor(m => m.EmployeeId, Url.Action("SearchEmployees", "Home"))
+                    @Html.ValidationMessageFor(m => m.EmployeeId, "", new {@class = "text-danger"})
+                </div>
+                <div class="col-md-4">
+                    @Html.BsDropDownListFor(m => m.ContactType, BsHelper.GetEnumSelectList<ContactTypeEnum>(), " --Select-- ")
+                    @Html.ValidationMessageFor(m => m.ContactType, "", new {@class = "text-danger"})
+                </div>
+                <div class="col-md-3">
+                    <div id="UpdateContactBtn" style="display:none;">
+                        <div class="pull-left" style="padding: 5px;">
+                            <button type="button" onclick="AddContact()" class="btn btn-sm btn-success">Update</button>
+                        </div>
+                        <div class="pull-left" style="padding: 5px;">
+                            <button type="button" onclick="CancelContact()" class="btn btn-sm btn-primary">Cancel</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="AddContactBtn">
+                        <button type="button" onclick="AddContact()" class="btn btn-sm btn-success">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="ContactsPartial">
+    @Html.Partial("Partials/_contactList", Model.Contacts)
+</div>
+
+<script>
+    $(document).ready(function () {
+        CheckContactRequired();
+
+        if ($('#ContactId').val() != '') {
+            $('#AddContactBtn').hide();
+            $('#UpdateContactBtn').show();
+        }
+    });
+
+    function AddContact() {
+        var id = $('#Sort_SortMainId').val();
+        var sn = $('#EmployeeId').val();
+        var ct = $('#ContactType').val();
+
+        if (id != '' && sn != '' && ct != '') {
+            $('.nav-pills a[href=#contactsTab]').addClass('saving');
+            var form = $('#ContactForm');
+            SetValidationMsg('EmployeeId', '');
+            SetValidationMsg('ContactType', '');
+
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    $("#ContactsPartial").html(data);
+                    CheckContactRequired();
+                    CancelContact();
+                })
+                .fail(function (response) { alert("Unable to Save the Contact.  Required fields missing or Invalid."); })
+                .always(function () { $('.nav-pills a[href=#contactsTab]').removeClass('saving'); });
+
+        } else {
+            if (sn == '') {
+                SetValidationMsg('EmployeeId', 'Contact Name is required');
+            } else {
+                SetValidationMsg('EmployeeId', '');
+            }
+            if (ct == '') {
+                SetValidationMsg('ContactType', 'Contact Type is required');
+            } else {
+                SetValidationMsg('ContactType', '');
+            }
+        }
+    }
+
+    function CancelContact() {
+        $('#ContactId').val('');
+        $('#EmployeeId').val('').text('').trigger('change');
+        $('#EmployeeId_search').val('').text('').trigger('change');
+        $('#ContactType').val('');
+        $('#AddContactBtn').show();
+        $('#UpdateContactBtn').hide();
+    }
+
+    function RemoveContact(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Contact',
+            content: 'Are you sure you wish to remove this contact?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#contactsTab]').addClass('saving');
+                $.post("/Artifact/RemoveContact",
+                    {
+                        id: row['ContactId']
+                    },
+                    function (data) {
+                        $("#ContactsPartial").html(data);
+                        CheckContactRequired();
+                    }).fail(function (response) { alert(response.responseText); })
+                    .always(function () { $('.nav-pills a[href=#contactsTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function CheckContactRequired() {
+        if ($('#contacts >tbody:last >tr').length > 0 &&
+            $("#contacts tr td:contains('POC')").length > 0 &&
+            !$('#contacts >tbody:last >tr >td').hasClass('dataTables_empty') &&
+            $("#contacts tr td:contains('(Invalid)')").length <= 0) {
+            $('.nav-pills a[href=#contactsTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#contactsTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

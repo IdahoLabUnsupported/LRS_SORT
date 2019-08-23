@@ -1,0 +1,293 @@
+﻿@using LRS.Business
+@using LRS.EmployeeHelper
+@model LRS.Mvc.Models.ReviewerModel
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Reviewer</b></p>
+    <p>The information to be released must be described and its contents reviewed by a Manager, an Export Compliance Analyst, and a Classified/Sensitive Information reviewer before it may be released outside INL.</p>
+    <p>Please select at least one Manager who is going to review this artifact</p>
+    <p>You may also select a Peer/Technical reviewer (Optional)</p>
+    <p>Final approvals by the Export Control and Classification Offices can be expected within 10 days after completion of manager approval. Items are reviewed as quickly as possible in the order they are received. Please plan accordingly.</p>
+</div>
+@using (Html.BeginForm("AddReviewer", "Artifact", FormMethod.Post, new { id = "ReviewForm", @onsubmit = "return false" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MainId)
+    @Html.HiddenFor(m => m.ReviewId)
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="panel-group">
+                <div class="row text-nowrap">
+                    <div class="col-md-4">@Html.BsLabelFor(m => m.ReviewerType, new { @class = "required col-md-3" })</div>
+                    <div class="col-md-8">@Html.BsLabelFor(m => m.ReviewerEmployeeId, new { @class = "col-md-3 required"})</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        @Html.BsDropDownListFor(m => m.ReviewerType, BsHelper.GetEnumSelectList<ReviewerTypeShortEnum>(), " --Select-- ", new { @class = "valid" })
+                        @Html.ValidationMessageFor(m => m.ReviewerType, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-8">
+                        @Html.EmployeeFor(m => m.ReviewerEmployeeId, Url.Action("SearchEmployees", "lookup"))
+                        @Html.ValidationMessageFor(m => m.ReviewerEmployeeId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-group">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div id="UpdateReviewBtn" style="display: none;">
+                            <div class="pull-left" style="padding: 5px;">
+                                <button type="button" onclick="AddReview()" class="btn btn-sm btn-success">Update</button>
+                            </div>
+                            <div class="pull-left" style="padding: 5px;">
+                                <button type="button" onclick="ClearReviewData()" class="btn btn-sm btn-primary">Cancel</button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div id="AddReviewBtn">
+                            <button type="button" onclick="AddReview()" class="btn btn-sm btn-success">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div id="ReviewsPartial">
+    @Html.Partial("Partials/_reviewList", Model.Reviews)
+</div>
+@if (Model.ReviewComments.Count > 0)
+{
+    <div>
+        <div class="col-md-3 control-label"><b>Reviewer Comments:</b></div>
+    </div>
+    <div>
+        @Html.Partial("Partials/_reviewCommentList", Model.ReviewComments)
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+
+        if ($('#ReviewId').val() != '') {
+            $('#AddReviewBtn').hide();
+            $('#UpdateReviewBtn').show();
+            $('#ReviewerType').trigger("change");
+        }
+        InitReview();
+
+        CheckReviewRequired();
+    });
+
+    function ShowTechData() {
+        BootstrapDialog.show({
+            title: 'Technology, Technical Data:',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Technology and technical data are drawings, diagrams, modeling and simulation information, results of experiments, manuals, engineering designs and specifications for development, ' +
+            'production or use of nuclear, military, space or other products. Financial, geographic, scheduling, and budget information do not require an export compliance review. Document still ' +
+            'requires classification and manager reviews.',
+            closable: false,
+            buttons: [{
+                label: 'Ok',
+                cssClass: 'btn-default',
+                action: function (dialogRef) {
+                    dialogRef.close();
+                }
+            }]
+        });
+    }
+
+    function InitReview() {
+        $('#ReviewerType').trigger('change');
+    }
+
+    function AddReview() {
+        if (CheckReviewRequiredMeet() === true) {
+            $('.nav-pills a[href=#reviewsTab]').addClass('saving');
+            var form = $('#ReviewForm');
+            SetValidationMsg('ReviewerEmployeeId', '');
+            SetValidationMsg('ReviewerType', '');
+
+            $.post(form.attr('action'),
+                form.serialize(),
+                function (data) {
+                    if (data != null && data != '') {
+                        $("#ReviewsPartial").html(data);
+                        CheckReviewRequired();
+                        ClearReviewData();
+                    } else {
+                        alert("Unable to Save the Reviewer.  Required fields missing or Invalid (Yourself and an Author can not be an Reviewer).");
+                    }
+                    
+                })
+                .fail(function (response) { SetValidationMsg('ReviewerEmployeeId', "Unable to Save the Reviewer.  Required fields missing or Invalid."); })
+                .always(function () { setTimeout(function () { $('.nav-pills a[href=#reviewsTab]').removeClass('saving'); }, 500); });
+        };
+    }
+
+    function RemoveReviewer(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Reviewer',
+            content: 'Are you sure you wish to remove this Reviewer?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#reviewsTab]').addClass('saving');
+                $.post("/Artifact/RemoveReviewer",
+                    {
+                        id: row['ReviewId']
+                    },
+                    function (data) {
+                        $("#ReviewsPartial").html(data);
+                        CheckReviewRequired();
+                    })
+                    .fail(function (response) { alert("Unable to complete request.  Server returned an error."); })
+                    .always(function () { $('.nav-pills a[href=#reviewsTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function SendReminder(row) {
+
+        var name = row['ReviewerName'];
+        if (name == null || name == '') {
+            name = row['ReviewerTypeDisplayName'] + ' Reviewers';
+        }
+
+        BootstrapDialog.show({
+            title: 'Send Reminder',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Are you sure you wish to send an email reminder to ' + name,
+            closable: true,
+            buttons: [{
+                label: 'Yes',
+                id: 'btnYes1',
+                cssClass: 'btn-primary',
+                action: function (dialogRef) {
+                    // Yes was clicked, so hid the buttons, and display that we are publishing
+                    var $closebutton = dialogRef.getButton('btnNo1');
+                    $closebutton.hide();
+                    var $mainbutton = dialogRef.getButton('btnYes1');
+                    $mainbutton.hide();
+                    dialogRef.getModalBody().html('Sending Email. Please Wait...');
+                    // Make an ajax call to send the reminder email
+                    $.post("/Artifact/SendReminderEmail",
+                        {
+                            id: row["ReviewId"]
+                        },
+                        function (data) {
+                            // Display the results of the send
+                            if (data == null) {
+                                dialogRef.getModalBody().html('<p style="color: Red;">Email Failed</p>');
+                            } else {
+                                $("#ReviewsPartial").html(data);
+                                CheckReviewRequired();
+                                dialogRef.getModalBody().html('<p styel="color: Green;">Email was successfully Sent</p>');
+                            }
+                            // 5 second delay to close dialog
+                            setTimeout(function () { dialogRef.close(); }, 5000);
+                        }).fail(function (xhr, status, error) {
+                            dialogRef.getModalBody().html('<p style="color: Red;">Email Failed</p><p>Error: ' + error + '</p>');
+                            setTimeout(function () { dialogRef.close(); }, 5000);
+                        });
+                }
+            }, {
+                // No was clicked, so close this dialog
+                label: 'No',
+                id: 'btnNo1',
+                cssClass: 'btn-default',
+                action: function (dialogRef) {
+                    dialogRef.close();
+                }
+            }]
+        });
+    }
+
+    function ReactivateReviewer(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Reactivate Reviewer',
+            content: 'Are you sure you wish to reactivate this Reviewer?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#reviewsTab]').addClass('saving');
+                $.post("/Artifact/ReactivateReviewer",
+                    {
+                        id: row['ReviewId']
+                    },
+                    function (data) {
+                        $("#ReviewsPartial").html(data);
+                        CheckReviewRequired();
+                    })
+                    .fail(function (response) { alert("Unable to complete request.  Server returned an error."); })
+                    .always(function () { setTimeout(function () { $('.nav-pills a[href=#reviewsTab]').removeClass('saving'); }, 500); });
+            }
+        });
+    }
+
+    function ReloadReviews() {
+        $.post("/Artifact/GetReviewersList",
+            {
+                id: $('#MainId').val()
+            },
+            function (data) {
+                $("#ReviewsPartial").html(data);
+                CheckReviewRequired();
+            })
+            .fail(function (response) { alert("Unable to complete request.  Server returned an error."); })
+            .always(function () { setTimeout(function () { $('.nav-pills a[href=#reviewsTab]').removeClass('saving'); }, 500); });
+    }
+    
+    function CheckReviewRequiredMeet() {
+        var isValid = true;
+
+        if ($('#MainId').val() == '' || $('#MainId').val() == '0') return false;
+
+        if ($('#ReviewerType').val() == '') {
+            isValid = false;
+            SetValidationMsg('ReviewerType', 'Review Type is required');
+        } else {
+            SetValidationMsg('ReviewerType', '');
+        }
+
+        if ($('#ReviewerEmployeeId').val() == '') {
+            isValid = false;
+            SetValidationMsg('ReviewerEmployeeId', 'Review Name is required');
+        } else {
+            SetValidationMsg('ReviewerEmployeeId', '');
+        }
+        
+        return isValid;
+    }
+
+    function ClearReviewData() {
+        $('#ContactId').val('');
+        $('#ReviewerEmployeeId').val('').text('').trigger('change');
+        $('#ReviewerEmployeeId_search').val('').text('').trigger('change');
+        $('#ReviewerType').val('').trigger('change');
+        $('#AddReviewBtn').show();
+        $('#UpdateReviewBtn').hide();
+    }
+
+    function CheckReviewRequired() {
+        var status = $('#Status').val();
+
+        if (status == 'ReviewNotRequired' || ($('#reviews >tbody:last >tr').length > 0 &&
+            $("#reviews tr td:contains('Manager')").length > 0 &&
+            !$('#reviews >tbody:last >tr >td').hasClass('dataTables_empty'))) {
+            $('.nav-pills a[href=#reviewersTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#reviewersTab]').addClass('required');
+        }
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

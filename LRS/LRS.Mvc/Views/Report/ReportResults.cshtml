@@ -1,0 +1,224 @@
+﻿@using LRS.Mvc.Classes
+@model List<LRS.Business.MainObject>
+@{
+    ViewBag.Title = "Report Search Results";
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+@using (Html.BeginForm("ExportReport", "Report", FormMethod.Post, new { id = "ExportForm" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="col-md-12">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">@ViewBag.Title</h3>
+            </div>
+            <div class="panel-body panel-grid">
+                <div class="container" style="overflow-x: auto !important; width: 100%; height: 650px; z-index: 2001;">
+                    <table id="ResultesTable" class="table table-bordered table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th style="text-align: center"><input id="MainCheck" type="checkbox" onclick="$('.rowchck').prop('checked', this.checked);"></th>
+                            <th nowrap="nowrap">STI Number and Rev</th>
+                            <th nowrap="nowrap">Title</th>
+                            <th nowrap="nowrap">Owner</th>
+                            <th nowrap="nowrap">Status</th>
+                            <th nowrap="nowrap">Review Progress</th>
+                            <th nowrap="nowrap">Review Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var row in Model)
+                        {
+                            <tr>
+                                <td style="text-align: center">
+                                    <input type="checkbox" class="rowchck" id="Check_@row.MainId" name="SelectedIds" value="@row.MainId" onclick="$('#MainCheck').prop('checked', false);">
+                                </td>
+                                <td nowrap="nowrap"><a href="@Url.Action("Index", "Artifact", new {id = row.MainId})">@row.DisplayTitle</a></td>
+                                <td width="25%">@row.Title</td>
+                                <td nowrap="nowrap">@row.OwnerName</td>
+                                <td nowrap="nowrap">@row.StatusDisplayName</td>
+                                <td nowrap="nowrap">@Html.Raw(row.ReviewProgress)</td>
+                                <td nowrap="nowrap">@row.ReviewStatus</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-9" style="margin-left: 15px;">
+                    <a href="@Url.Action("Index")" class="btn btn-primary">Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    if (Model.Count > 0)
+    {
+        <div class="col-md-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Results Export</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-12">
+                        <table class="table table-bordered table-condensed table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Column Name</th>
+                                    <th>
+                                        <div class="pull-left" style="margin-left: 5px;"><input id="MasterCheck" type="checkbox" /></div>
+                                        <div class="pull-left" style="margin-left: 10px;">Show on Report</div>
+                                        <div class="clearfix"></div>
+                                    </th>
+                                    <th>
+                                        <div class="pull-left" style="margin-left: 5px;"><input id="SheetCheck" type="checkbox" /></div>
+                                        <div class="pull-left" style="margin-left: 10px;">Own Sheet</div>
+                                        <div class="clearfix"></div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>STI Number</td>
+                                    <td><input type="checkbox" name="ColSelection" value="StiNumber" checked="checked" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Revision</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Revision" checked="checked" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Title</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Title" checked="checked" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Status</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Status" checked="checked" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Number Pages</td>
+                                    <td><input type="checkbox" name="ColSelection" value="NumberPages" checked="checked" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Document Type</td>
+                                    <td><input type="checkbox" name="ColSelection" value="ProductType" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Creation Date</td>
+                                    <td><input type="checkbox" name="ColSelection" value="CreationDate" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Approved Date</td>
+                                    <td><input type="checkbox" name="ColSelection" value="ApprovedDate" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Description / Abstract</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Abstract" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Conference Info</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Conference" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Journal Info</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Journal" style="margin-left: 5px;" /></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>Contacts Info</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Contacts" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Contacts" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Authors Info</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Authors" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Authors" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Funding Info</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Funding" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Funding" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Subject Codes</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Subjects" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Subjects" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Intellectual Property</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Intellectual" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Intellectual" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Keyword(s)</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Keywords" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Keywords" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Reviewer(s)</td>
+                                    <td><input type="checkbox" name="ColSelection" value="Reviewers" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="Reviewers" style="margin-left: 5px;" /></td>
+                                </tr>
+                                <tr>
+                                    <td>Reviewer History</td>
+                                    <td><input type="checkbox" name="ColSelection" value="ReviewerHistory" style="margin-left: 5px;" /></td>
+                                    <td><input type="checkbox" name="SheetSelection" value="ReviewerHistory" style="margin-left: 5px;" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-9" style="margin-left: 15px;">
+                            <button type="submit" class="btn btn-primary">Export Report to Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+<script>
+    $(document).ready(function () {
+        $('#MasterCheck').change(function() {
+            if (this.checked) {
+                $("input:checkbox[name='ColSelection']").prop('checked', true);
+            } else {
+                $("input:checkbox[name='ColSelection']").prop('checked', false);
+                $("input:checkbox[name='ColSelection']").change();
+            }
+        });
+
+        $('#SheetCheck').change(function () {
+            if (this.checked) {
+                $("input:checkbox[name='SheetSelection']").prop('checked', true);
+                $("input:checkbox[name='SheetSelection']").change();
+            } else {
+                $("input:checkbox[name='SheetSelection']").prop('checked', false);
+            }
+        });
+
+        $("input:checkbox[name='SheetSelection']").change(function () {
+            if (this.checked) {
+                $("input:checkbox[name='ColSelection'][value='" + this.value + "']").prop('checked', true);
+            }
+        });
+
+        $("input:checkbox[name='ColSelection']").change(function () {
+            if (!this.checked) {
+                $("input:checkbox[name='SheetSelection'][value='" + this.value + "']").prop('checked', false);
+            }
+        });
+    });
+</script>

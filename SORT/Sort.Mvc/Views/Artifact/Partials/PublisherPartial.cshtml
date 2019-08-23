@@ -1,0 +1,83 @@
+﻿@using Sort.Business
+@model SortMainObject
+    
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Book/Monograph Publisher</b></p>
+    <p>Place enter the information about who the publisher is for the book/monograph.</p>
+    <p>Country is only needed is other than the United States.</p>
+</div>
+
+@using (Html.BeginForm("PublisherSave", "Artifact", FormMethod.Post, new {id = "PublisherForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    <div class="row text-nowrap">
+        <div class="col-md-8">@Html.BsLabelFor(m => m.PublisherName, new {@class = "required col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            @Html.BsTextBoxFor(m => m.PublisherName, new { @class = "check-required" })
+        </div>
+    </div>
+    <br/>
+    <div class="row text-nowrap">
+        <div class="col-md-6">@Html.BsLabelFor(m => m.PublisherCity, new {@class = "required col-md-3"})</div>
+        <div class="col-md-2">@Html.BsLabelFor(m => m.PublisherState, new {@class = "required col-md-3"})</div>
+        <div class="col-md-4">@Html.BsLabelFor(m => m.PublisherCountry, new {@class = "col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            @Html.BsTextBoxFor(m => m.PublisherCity, new { @class = "check-required" })
+        </div>
+        <div class="col-md-2">
+            @Html.BsTextBoxFor(m => m.PublisherState, new { @class = "check-required" })
+        </div>
+        <div class="col-md-4">
+            @Html.BsDropDownListFor(m => m.PublisherCountry, MemoryCache.CountryNameList(), " --Select-- ")
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#PublisherForm .check-required').change(function () {
+            CheckPublisherRequired();
+        });
+
+        CheckPublisherRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckPublisherRequired() {
+        var requirMeet = true;
+        $('#PublisherForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#publisherTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#publisherTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function PublisherSave() {
+        $('.nav-pills a[href=#publisherTab]').addClass('saving');
+        var form = $('#PublisherForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function() {
+                $('.nav-pills a[href=#publisherTab]').removeClass('saving');
+            });
+    }
+</script>

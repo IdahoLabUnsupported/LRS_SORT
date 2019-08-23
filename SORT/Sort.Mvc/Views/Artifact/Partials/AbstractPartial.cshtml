@@ -1,0 +1,66 @@
+﻿@model Sort.Business.SortMainObject
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Abstract</b></p>
+    <p>Place the text of you abstract below, up to 5000 characters</p>
+</div>
+
+@using (Html.BeginForm("AbstractSave", "Artifact", FormMethod.Post, new {id = "AbstractForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+
+    <div class="form-group col-md-12">
+        <div class="row text-nowrap">
+            <div class="col-md-4">@Html.BsLabelFor(m => m.Abstract, new {@class = "required col-md-3"})</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextAreaFor(m => m.Abstract, new { @class = "check-required", @style = "min-height:325px;"})
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#AbstractForm .check-required').change(function () {
+            CheckAbstractRequired();
+        });
+
+        CheckAbstractRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckAbstractRequired() {
+        var requirMeet = true;
+        $('#AbstractForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#abstractTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#abstractTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function AbstractSave() {
+        $('.nav-pills a[href=#abstractTab]').addClass('saving');
+        var form = $('#AbstractForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#abstractTab]').removeClass('saving');
+            });
+    }
+</script>

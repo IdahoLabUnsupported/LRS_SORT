@@ -1,0 +1,30 @@
+﻿@model List<Sort.Business.FundingObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("funding").Columns(c =>
+    {
+        c.Bound(m => m.FundingId).Hidden();
+        c.Bound(m => m.IsValid).Hidden();
+        c.Bound(m => m.Year).Title("Fiscal Year").Sortable(false).Render("YearRender");
+        c.Bound(m => m.FundingType).Title("Funding Source").Sortable(false);
+        c.Bound(m => m.DetailInfo).Title("Details").Sortable(false);
+        c.Bound(m => m.Org).Title("Funding Org").Sortable(false);
+        c.Bound(m => m.PercentFmt).Title("Funding Percent").Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button("ShowFundingInfo").Icon("info").Type("info").ToolTip("Show all the Funding Information");
+            b.Button("EditFunding").Icon("edit").Type("primary").ToolTip("Edit Funding");
+            b.Button("RemoveFunding").Icon("times").Type("danger").ToolTip("Remove Funding");
+        }).Width(50).AlignCenter();
+    }).Clean()
+</div>
+
+<script>
+    function YearRender(data, type, row) {
+        if (row["IsValid"] == "True") {
+            return data;
+        } else {
+            return "<i style=\"Color:Red;\">(Invalid) </i>" + data;
+        }
+    }
+</script>

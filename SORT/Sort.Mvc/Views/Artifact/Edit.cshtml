@@ -1,0 +1,518 @@
+﻿@using Sort.Business
+@using Sort.Mvc.Classes
+@model Sort.Mvc.Models.ArtifactModel
+@{
+    ViewBag.Title = "Artifact " + Model.Sort.TitleStr;
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+
+<style>
+    em.undefined-display{
+        display: none;
+    }
+
+    .nav-pills > li > a {
+        border-radius: 14px 0 14px  0 ;
+    }
+
+</style>
+
+@Html.HiddenFor(m => m.SelectedTab)
+
+<div class="col-md-12">
+    <a onclick="SendHome();" class="btn btn-link"><i class="fa fa-long-arrow-left"></i> Home</a>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Artifact @Model.Sort.TitleStr</h3>
+        </div>
+        <div class="panel-body">
+            @Html.HiddenFor(m => m.Sort.SortMainId)
+            <div class="col-md-2 pnl">
+                <ul id="artifactTabs" class="nav nav-pills nav-stacked">
+                    <li role="presentation" data-savefunction="TitleSave" class="active"><a href="#titleTab" data-toggle="tab">Main Info</a></li>
+                    <li role="presentation" data-savefunction="AbstractSave"><a href="#abstractTab" data-toggle="tab">Abstract</a></li>
+                    <li role="presentation" data-savefunction="ContractSave"><a href="#contactsTab" data-toggle="tab">Contact(s)</a></li>
+                    <li role="presentation" data-savefunction="AuthorSave"><a href="#authorsTab" data-toggle="tab">Author(s)</a></li>
+                    <li role="presentation" data-savefunction="FundingSave"><a href="#fundingTab" data-toggle="tab">Funding</a></li>
+                    <li role="presentation" data-savefunction="SubjectSave"><a href="#subjectTab" data-toggle="tab">Subject</a></li>
+                    <li role="presentation" data-savefunction="SponsorSave"><a href="#sponsorTab" data-toggle="tab">Sponsoring Org(s)</a></li>
+                    <li role="presentation" data-savefunction="KeywordSave"><a href="#keywordsTab" data-toggle="tab">Keyword(s)</a></li>
+                    <li role="presentation" data-savefunction="CoreCapabilitiesSave"><a href="#coreCapabilitiesTab" data-toggle="tab">Core Capabilities</a></li>
+                    <li role="presentation" data-savefunction="AttachmentsSave"><a href="#attachmentsTab" data-toggle="tab">Attachment(s)</a></li>
+                    <li role="presentation" data-savefunction="ReviewersSave"><a href="#reviewersTab" data-toggle="tab">Reviews</a></li>
+                </ul>
+            </div>
+
+            <div class="tab-content clearfix">
+                @*title*@
+                <div class="tab-pane fade in active" id="titleTab">
+                    <div class="col-md-10 pnl well">
+                        <a class="btn btn-link btn-xs pull-right btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/TitlePartial", Model.Sort)
+                        </div>
+                        <a class="btn btn-link btn-xs pull-right btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                    </div>
+                </div>
+                @*end title*@
+
+                @*ProductType conference*@
+                <div class="tab-pane fade in" id="conferenceTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/ConferencePartial", Model.Sort)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end ProductType conference*@
+
+                @*ProductType journal*@
+                <div class="tab-pane fade in" id="journalTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/JournalPartial", Model.Sort)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end ProductType journal*@
+
+                @*ProductType publisher*@
+                <div class="tab-pane fade in" id="publisherTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/PublisherPartial", Model.Sort)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end ProductType publisher*@
+
+                @*ProductType patent*@
+                <div class="tab-pane fade in" id="patentTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/PatentPartial", Model.Sort)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end ProductType patent*@
+
+                @*contacts*@
+                <div class="tab-pane fade in" id="contactsTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div id="MainContactPartial" class="panel-body">
+                            @Html.Partial("Partials/ContactsPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end contacts*@
+
+                @*Authors*@
+                <div class="tab-pane fade in" id="authorsTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div id="MainAuthorPartial" class="panel-body">
+                            @Html.Partial("Partials/AuthorsPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Authors*@
+
+                @*Funding*@
+                <div class="tab-pane fade in" id="fundingTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div id="MainFundingPartial" class="panel-body">
+                            @Html.Partial("Partials/FundingPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Funding*@
+
+                @*Abstract*@
+                <div class="tab-pane fade in" id="abstractTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/AbstractPartial", Model.Sort)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Abstract*@
+
+                @*Subject*@
+                <div class="tab-pane fade in" id="subjectTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/SubjectPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Subject*@
+
+                @*CoreCapabilities*@
+                <div class="tab-pane fade in" id="coreCapabilitiesTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Action("CoreCapabilitiesPartial", "Artifact", new { id = Model.SortMainId })
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-info btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-info btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end CoreCapabilities*@
+
+                @*Keywords*@
+                <div class="tab-pane fade in" id="keywordsTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/KeywordsPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Keywords*@
+
+                @*Sponsoring Orginizations*@
+                <div class="tab-pane fade in" id="sponsorTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/SponsorOrgPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Sponsoring Orginizations*@
+
+                @*Access Limitation OpenNet*@
+                <div class="tab-pane fade in" id="openNetTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/OpenNetPartial", Model.Sort.OpenNetData)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Access Limitation OpenNet*@
+
+                @*Access Limitation Protected Data*@
+                <div class="tab-pane fade in" id="protectedDataTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/ProtectedDataPartial", Model.Sort.ProtectedData)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Access Limitation Protected Data*@
+
+                @*Access Limitation Official Use*@
+                <div class="tab-pane fade in" id="officialUseTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/OfficialUsePartial", Model.Sort)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Access Limitation Official Use*@
+
+                @*Attachments*@
+                <div class="tab-pane fade in" id="attachmentsTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            @Html.Partial("Partials/AttachmentsPartial", Model)
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                            <a class="btn btn-link btn-xs btnNext">Next <i class="fa fa-long-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+                @*end Attachments*@
+
+
+                @*Reviewers*@
+                <div class="tab-pane fade in" id="reviewersTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body">
+                            <div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+                                <p><b>Reviewers</b></p>
+                                <p>This is a list of the reviewers and the related date from the Sharepoint website.</p>
+                                <p>In order to modify the reviewers you will need to go to your entry in the Sharepoint website.</p>
+                            </div>
+
+                            <div class="form-group col-md-12">
+                                @Html.Talon().Grid(Model.Sort.Reviewers).Name("reviewers").Columns(c =>
+                      {
+                          c.Bound(m => m.ReviewId).Hidden();
+                          c.Bound(m => m.Reviewer).Sortable(false);
+                          c.Bound(m => m.ReviewerTypeDisplayName).Title("Reviewer Type").Sortable(false);
+                          c.Bound(m => m.ReviewDate).Title("Review Date").Sortable(false);
+                          c.Bound(m => m.Approval).Title("Approved").Sortable(false);
+                          c.Bound(m => m.Reason).Title("Reason");
+                      }).Clean()
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <a class="btn btn-link btn-xs btnPrevious"><i class="fa fa-long-arrow-left"></i> Previous</a>
+                        </div>
+                    </div>
+                </div>
+                @*end Reviewers*@
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-primary">
+        <div class="panel-body">
+            <div class="col-md-12">
+                <a onclick="SendHome();" class="btn btn-sm btn-default"><i class="fa fa-home"></i> Home</a>
+                @if (!string.IsNullOrWhiteSpace(Model.LrsUrl))
+                {
+                    <a href="@Model.LrsUrl" target="_blank" title="View in LRS" class="btn btn-sm btn-default"><i class="fa fa-globe"></i> Open in LRS</a>
+                }
+                <a href="@Url.Action("Index", "Artifact", new {id = Model.SortMainId})" title="Review Artifact" class="btn btn-sm btn-primary"><i class="fa fa-list"></i> Review</a>
+                @if (UserObject.CurrentUser.IsInAnyRole("Admin,ReleaseOfficial"))
+                {
+                    <a id="btnSubmit" href="@Url.Action("Index", "Artifact", new { id = Model.SortMainId })" style="display: none;" title="Submit Artifact" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Submit</a>
+                }
+                else
+                {
+                    <a id="btnSubmit" href="@Url.Action("Index", "Home")" style="display: none;" title="Submit Artifact" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Submit</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var stab = $('#SelectedTab').val();
+        if (stab != '') {
+            $('a[href="#' + stab + '"]').trigger('click');
+        }
+
+        $('.btnNext').click(function () {
+            $('.nav-pills > .active').next('li').find('a').trigger('click');
+        });
+
+        $('.btnPrevious').click(function () {
+            $('.nav-pills > .active').prev('li').find('a').trigger('click');
+        });
+
+        CheckForCompletion();
+    });
+
+    // This is used to call a save function when a tab is hidden (or moved off from)
+    $(document).on('hide.bs.tab', 'a[data-toggle="tab"]', function (e) {
+        TriggerSaveFunction($(e.target).parent());
+    });
+
+    // This is used to call the save funciton when the window is unloading.
+    $(window).unload(function () {
+        TriggerSaveFunction($('#artifactTabs li.active'));
+    });
+
+    // Function to call the tabs save function.
+    function TriggerSaveFunction(obj) {
+        if (obj != null && obj != '') {
+            // Get the save function data from the object
+            var functionName = obj.data("savefunction");
+            if (functionName != '') {
+                // Need to add window. to the first of the function name to be able to search inside the entire area
+                // This is since the function is dynamically loaded.
+                functionName = 'window.' + functionName;
+                // Eval the function name to find the function.
+                var saveFunction = eval(functionName);
+                // Make sure it is a function
+                if ($.isFunction(saveFunction)) {
+                    // Call the function
+                    saveFunction();
+                }
+            }
+        }
+    }
+
+    function CheckForCompletion() {
+        if ($('#artifactTabs li a.required').length == 0) {
+            $('#btnSubmit').show();
+        } else {
+            $('#btnSubmit').hide();
+        }
+    }
+
+    function SetValidationMsg(control, msg) {
+        $('[data-valmsg-for="' + control + '"]').html(msg);
+    }
+
+    function EditContact(row) {
+        $.post("/Artifact/GetContactPartial",
+            {
+                id: row['ContactId']
+            },
+            function (data) {
+                $("#MainContactPartial").html(data);
+            }).fail(function (response) { if (response.responseText != '') { alert(response.responseText); } });
+    }
+
+    function EditAuthor(row) {
+        $.post("/Artifact/GetAuthorPartial",
+            {
+                id: row['AuthorId']
+            },
+            function (data) {
+                $("#MainAuthorPartial").html(data);
+            }).fail(function (response) { if (response.responseText != '') { alert(response.responseText); } });
+    }
+
+    function EditFunding(row) {
+        $.post("/Artifact/GetFundingPartial",
+            {
+                id: row['FundingId']
+            },
+            function (data) {
+                $("#MainFundingPartial").html(data);
+            }).fail(function (response) { if (response.responseText != '') { alert(response.responseText); } });
+    }
+
+    function SendHome() {
+        TriggerSaveFunction($('#artifactTabs li.active'));
+        window.location.href = "/";
+    }
+</script>

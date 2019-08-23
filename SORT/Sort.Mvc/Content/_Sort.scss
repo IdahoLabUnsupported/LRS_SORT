@@ -1,0 +1,79 @@
+
+body {
+    padding-top: 80px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+    min-height: 350px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+.display-for {
+    padding-top: 11px;
+}
+
+.panel-title .pull-left i, h3.panel-title i {
+    margin-right: 5px;
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding-left: 5px;
+        padding-right: 5px;
+        overflow-x: hidden;
+    }
+}
+
+.panel-body.list-group {
+    padding: 0;
+}
+
+.tt-menu {
+    max-width: 100%;
+}
+
+a.list-group-item {
+    cursor: pointer;
+    position: relative;
+}
+
+a.list-group-item .phone {
+    display: block;
+    padding-left: 12px;
+    font-size: 12px;
+}
+
+a.list-group-item .fa-minus-square {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 24px;
+}
+
+legend {
+    margin-bottom: 0;
+    padding-top: 10px;
+    font-size: 18px;
+    color: #033C73;
+}
+
+#card-phone {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.navbar-brand > img {
+    margin-top: -3px;
+    margin-left: 10px;
+    height: 1.4em;
+}

@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<html>
+@using StackExchange.Profiling;
+@using LRS.Mvc.Classes
+@using LRS.Mvc.Models
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @*<meta http-equiv="X-Frame-Options" content="deny">*@
+
+    <title>@ViewBag.Title - LRS</title>
+
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css?v=0.027" rel="stylesheet" />
+    <link href="~/Content/jquery-confirm.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-dialog.css" rel="stylesheet" />
+
+    @BsHelper.CssDependencies()
+
+    <script src="~/Scripts/modernizr-2.8.3.js"></script>
+    @RenderSection("head", false)
+    <script src="~/Scripts/jquery-2.1.4.min.js"></script>
+</head>
+<body>
+    <div class="navbar navbar-default navbar-fixed-top">
+        @if (Config.ApplicationMode != LRS.Business.ApplicationMode.Production && Config.ExecutionMode == LRS.Business.ExecutionMode.Server)
+        {
+            <div class="label label-warning text-center" style="display:block; border-radius: 0;">
+                UAT - User Acceptance Testing - THIS IS NOT A PRODUCTION SYSTEM
+            </div>
+            <style>
+                body {
+                    padding-top: 95px !important;
+                }
+            </style>
+        }
+        <div class="container wide-div">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="@Url.Action("Index", "Home")" class="navbar-brand">LRS - Laboratory Review System</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    @Html.Partial("_NavbarMenu")
+                </ul>
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </div>
+    <!-- Content Area -->
+    <div class="main-content">
+        <div class="container body-content wide-div">
+            <div class="row" style="margin-bottom: 15px;">
+                <div class="col-sm-12">
+                    <!-- Breadcrumb -->
+                    <ol class="breadcrumb">
+                        @{ var breadcrumb = Breadcrumb.Items;
+                            if (breadcrumb.Count == 0)
+                            {
+                                Breadcrumb.Auto();
+                                breadcrumb = Breadcrumb.Items;
+                            }
+                            int i = 0;
+                        }
+                        @foreach (var bc in breadcrumb)
+                        {
+                            i++;
+                            if (i < breadcrumb.Count)
+                            {
+                                <li><a href="@bc.Value">@bc.Key</a></li>
+                            }
+                            else
+                            {
+                                <li class="active">@bc.Key</li>
+                            }
+                        }
+                    </ol>
+                    <div style="right: 0; top: -29px; height: 10px; position: absolute; z-index: 10;">@Html.Partial("Partials/_SearchPartial", new SearchModel())</div>
+                </div>
+            </div>
+            @* ******************** RENDER BODY ******************* *@
+            @RenderBody()
+        </div>
+    </div>
+    <!-- end Content Area -->
+    <hr />
+    <footer>
+        <div class="container">
+            <p>&copy; @DateTime.Now.Year - Idaho National Laboratory</p>
+        </div>
+    </footer>
+
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/respond.js"></script>
+    <script src="~/Scripts/jquery-confirm.min.js"></script>
+    <script src="~/Scripts/bootstrap-dialog.js"></script>
+
+    @BsHelper.JsDependencies()
+
+    @RenderSection("scripts", required: false)
+
+    @MiniProfiler.RenderIncludes()
+</body>
+</html>

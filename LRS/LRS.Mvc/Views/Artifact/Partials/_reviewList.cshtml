@@ -1,0 +1,22 @@
+﻿@model List<LRS.Business.ReviewObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("reviews").Columns(c =>
+    {
+        c.Bound(m => m.ReviewId).Hidden();
+        c.Bound(m => m.ReviewerName).Sortable(false);
+        c.Bound(m => m.ReviewerTypeDisplayName).Title("Reviewer Type").Sortable(false);
+        c.Bound(m => m.ReviewStatusTxt).Title("Status").Sortable(false);
+        c.Bound(m => m.EditButtons).Title(" ").Width(150).AlignCenter().Sortable(false);
+    }).Clean()
+</div>
+
+<script>
+    function AuthorNameRender(data, type, row) {
+        if (row["IsValid"] == "True") {
+            return data;
+        } else {
+            return "<i style=\"Color:Red;\">(Invalid) </i>" + data;
+        }
+    }
+</script>

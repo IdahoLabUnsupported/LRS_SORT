@@ -1,0 +1,105 @@
+﻿@using Sort.Business
+@model ProtectedDataObject
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Protected Data - CRADA or other</b></p>
+    <p>Information produced in the performance of a CRADA that is marked as being Protected CRADA Information by a party to the agreement 
+        and that would have been proprietary information had it been obtained from a non-Federal entity.
+        It may be protected for a period up to 5 years from the date it was produced, except as expressly provided for in the CRADA.</p>
+    <p>Please provide the Release Data, Exemption Number, If this is CRADA, or the Description of where the Protected Data came from.</p>
+</div>
+
+@using (Html.BeginForm("ProtectedDataSave", "Artifact", FormMethod.Post, new {id = "ProtectedDataForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-offset-2 col-md-5">@Html.BsLabelFor(m => m.ReleaseDate, new {@class = "required col-md-3"})</div>
+                <div class="col-md-5">@Html.BsLabelFor(m => m.ExemptNumber, new {@class = "required col-md-3"})</div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    @Html.BsCheckBoxFor(m => m.Crada, "CRADA", new { @class = "check-required" })
+                </div>
+                <div class="col-md-5">
+                    @Html.BsDatePickerFor(m => m.ReleaseDate, new { @class = "check-required" }).ClearButton(true).TodayButton(true)
+                </div>
+                <div class="col-md-5">
+                    @Html.BsTextBoxFor(m => m.ExemptNumber, new { @class = "check-required" })
+                </div>
+            </div>
+
+            <div id="CradaDiv">
+                <br/>
+                <div class="row text-nowrap">
+                    <div class="col-md-8">@Html.BsLabelFor(m => m.Description, new {@class = "required col-md-3"})</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.BsTextBoxFor(m => m.Description, new { @class = "check-required" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function() {
+        $('#Crada').change(function () {
+            if (this.checked) {
+                $('#CradaDiv').hide();
+            } else {
+                $('#CradaDiv').show();
+            }
+        });
+
+        $('#ProtectedDataForm .check-required').change(function () {
+            CheckProtectedDataRequired();
+        });
+
+        $("#ReleaseDate").closest('.input-group').on("dp.change", function (e) {
+            CheckProtectedDataRequired();
+        });
+
+        InitProtectedData();
+    });
+
+    function InitProtectedData() {
+        $('#Crada').trigger('change');
+        CheckProtectedDataRequired();
+    }
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckProtectedDataRequired() {
+        var requirMeet = true;
+
+        if ($('#ReleaseDate').val() == '') { requirMeet = false; }
+        if ($('#ExemptNumber').val() == '') { requirMeet = false; }
+        if ($('#Crada').is(":checked") == false && $('#Description').val() == '') { requirMeet = false; }
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#protectedDataTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#protectedDataTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function ProtectedDataSave() {
+        $('.nav-pills a[href=#protectedDataTab]').addClass('saving');
+        var form = $('#ProtectedDataForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#protectedDataTab]').removeClass('saving');
+            });
+    }
+</script>

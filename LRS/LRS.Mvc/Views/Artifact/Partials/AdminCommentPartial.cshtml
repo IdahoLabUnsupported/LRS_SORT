@@ -1,0 +1,102 @@
+﻿@using LRS.Business
+@model LRS.Mvc.Models.AdminCommentsModel
+
+
+<div class="col-md-12" id="CommentsArea">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <div class="pull-left">
+                    <a id="btnExpandComment" href="#CommentsAreaGrid" title="Show/Hide Comments" data-toggle="collapse" style="font-size:1.25em; color:blue;">
+                        <i class="fa fa-arrow-down"></i>
+                    </a>
+                </div>
+                <div class="pull-left">
+                    <a href="#CommentsAreaGrid" data-toggle="collapse" style="color: darkblue; text-decoration: none;">
+                        <span class="badge" style="background-color: #93C54B;">@Model.Comments.Count</span>
+                    </a>
+                </div>
+                <div class="pull-right">
+                    <button type="button" value="@Model.MainId" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#dvAddAdminComment"><i class="fa fa-plus"> Add Comment</i></button>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div id="CommentsAreaGrid" class="panel-collapse collapse">
+            <div class="panel-body panel-grid">
+                @(Html.Talon().Grid(Model.Comments).Name("Comments").Columns(c =>
+            {
+                c.Bound(x => x.AdminCommentId).Hidden();
+                c.Bound(x => x.MainId).Hidden();
+                c.Bound(x => x.EmployeeId).Hidden();
+                c.Bound(x => x.Deleted).Hidden();
+                c.Bound(x => x.Comment);
+                c.Bound(x => x.UserName).Title("Added By").Width(200);
+                c.Bound(x => x.EntryDate).Order().Title("Time Added").Format("MM/dd/yyyy hh:mm tt").Width(150);
+                if (Model.IsReleaseOfficer)
+                {
+                    c.Bound(x => x.AdminOnly).Title("Admin Eyes Only");
+                }
+                c.Bound(x => x.GridButtonsHtml).Width(60).AlignCenter().Title(" ");
+            }))
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.Hidden("TempCId")
+
+<script>
+    $(document).ready(function () {
+        $("#CommentsAreaGrid").on("hide.bs.collapse", function () {
+            $("#btnExpandComment").html('<i class="fa fa-arrow-down"></i>');
+        });
+        $("#CommentsAreaGrid").on("show.bs.collapse", function () {
+            $("#btnExpandComment").html('<i class="fa fa-arrow-up"></i>');
+        });
+    });
+
+    function FireButton(el, method) {
+        var tr = $(el).closest('tr');
+        var tb = $(el).closest('table').data('datatable');
+        var d = tb.row(tr).data();
+        method.call(el, d);
+    }
+
+    function DeleteAdminComment(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Delete Comment',
+            content: 'Are you sure you wish to delete this Comment?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-info',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            value: row["AdminCommentId"],
+            confirm: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Artifact/DeleteAdminComment",
+                    dataType: "Json",
+                    data: {
+                        id: this.value
+                    },
+                    complete: function (data) {
+                        if ($.isFunction(window.LoadAdminCommentsPartial)) {
+                            window.LoadAdminCommentsPartial(row["MainId"]);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function EditAdminComment(row) {
+        $("#AdminCommentId").val(row["AdminCommentId"]);
+        $("#AdminComment").val(row["Comment"]);
+        if (row["AdminOnly"] == 'True' || row["AdminOnly"] == true) {
+            $("#AdminOnly").prop('checked', true);
+        }
+        $('#dvAddAdminComment').modal('show');
+    }
+</script>

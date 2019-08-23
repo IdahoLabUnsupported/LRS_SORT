@@ -1,0 +1,136 @@
+﻿@using LRS.Business
+@model LRS.Mvc.Models.HomeModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@Html.Hidden("FailMessage", TempData["FailMessage"])
+
+<style>
+    #ViewMode, #OrgOption {
+        height: 25px !important;
+        line-height: 25px !important;
+        padding: 0;
+    }
+
+    #ViewTime {
+        height: 25px !important;
+        line-height: 25px !important;
+        padding: 0;
+        text-align: center !important;
+    }
+
+    .specialeffects:hover {
+        color: black !important;
+        background-color: darkcyan !important;
+    }
+
+    sup { 
+        font-size: .25em !important;
+    }
+</style>
+
+<div class="col-md-12">
+    <a href="@Url.Action("Index", "Artifact")" class="btn btn-primary specialeffects" style="margin: 0 0 15px 0; width: 100%; color: white; border-radius: 5px; background-color: darkslategray;"><i class="fa fa-plus" style="font-size: 1.5em;"><b> Add Artifact</b></i><br /><span>Create a New Document Review Artifact</span></a>
+</div>
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="pull-left">
+                <h3 class="panel-title">Artifacts </h3>
+            </div>
+            @using (Html.BeginForm("Index", "Home", FormMethod.Post, new { id = "mainForm" }))
+            {
+                <div class="pull-left col-md-4">
+                    @Html.BsDropDownListFor(x => x.ViewMode, Model.ViewModes(), new { onchange = "this.form.submit();" })
+                </div>
+                <div class="row text-nowrap pull-left ">
+                    <div class="col-md-2">Show Last:</div>
+                    <div class="col-md-2">@Html.BsInputMaskFor(m => m.ViewTime, InputMaskFormat.Integer, new { @placeholder = "" })</div>
+                    <div class="col-md-2" style="padding-left: 0 !important;">Month(s)</div>
+                    <div class="col-md-2"><button type="submit" class="btn btn-sm btn-primary"><i class="fa fa-recycle"> Refresh</i></button></div>
+                </div>
+            
+                <div class="pull-right">
+                    @*<a href="@Url.Action("Index", "Artifact")" class="btn btn-sm btn-primary"><i class="fa fa-plus"> Add Artifact</i></a>*@
+                </div>
+                <div class="clearfix"></div>
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-md-12" style="margin-top:-15px;">
+                            <div id="RadioGroup" style="font-size:1em;">
+                                <label class="radio-inline">@Html.RadioButtonFor(m => m.OrgMode, 1, new { onchange = "this.form.submit();" }) My Artifacts</label>
+                                <label class="radio-inline">@Html.RadioButtonFor(m => m.OrgMode, 2, new { onchange = "this.form.submit();" }) My Org Artifacts</label>
+                                @if (Model.OrgMode == (int)OrgOptionEnum.OrgArtifacts)
+                                {
+                                    <div class="radio-inline row text-nowrap">
+                                        <div class="col-md-3">Organization:</div>
+                                        <div class="col-md-9">@Html.BsDropDownListFor(m => m.OrgOption, Model.UserOrgs, "All", new { onchange = "this.form.submit();" })</div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="panel-body text-center">
+            <div class="panel-body">
+                @(Html.Talon().Grid<MainObject>().Name("MainTable").Columns(c =>
+                  {
+                      c.Bound(x => x.MainId).Hidden();
+                      c.Bound(x => x.GridFlags).Title("Flags").Width(30).Order(SortDir.desc);
+                      c.Bound(x => x.DisplayTitle).Width(175).Title("STI Number and Rev");
+                      c.Bound(x => x.Title).Title("Title");
+                      c.Bound(x => x.OwnerName).Title("Creator");
+                      c.Bound(x => x.ActivityDate).Format("MM/dd/yyyy hh:mm tt").Title("Last Activity").Order(SortDir.desc);
+                      c.Bound(x => x.StatusDisplayName).Title("Status");
+                      c.Bound(x => x.ReviewProgress).Title("Review Progress");
+                      c.Bound(x => x.ReviewStatus).Title("Review Status");
+                      c.Bound(x => x.GridButtons).Title(" ").Width(90).AlignCenter();
+                  }).AjaxSource(Url.Action("HomGridData", "Home", new { viewMode = Model.ViewMode, viewTime = Model.ViewTime, orgMode = Model.OrgMode, orgOption = Model.OrgOption }))
+                      )
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+@if (Model.Reviews != null && Model.Reviews.Count > 0)
+{
+    <div class="col-lg-12">
+        <div class="panel panel-warning">
+            <div class="panel-heading">
+                <h3 class="panel-title">Artifacts To Review </h3>
+            </div>
+            <div class="panel-body text-center">
+                <div class="panel-body">
+                    @(Html.Talon().Grid(Model.Reviews).Name("ReviewTable").Columns(c =>
+                    {
+                        c.Bound(x => x.MainId).Hidden();
+                        c.Bound(x => x.GridFlags).Title("Flags").Width(30).Order(SortDir.desc);
+                        c.Bound(x => x.DisplayTitle).Width(175).Title("STI Number and Rev");
+                        c.Bound(x => x.Title).Title("Title");
+                        c.Bound(x => x.OwnerName).Title("Creator");
+                        c.Bound(x => x.StatusDisplayName).Title("Status");
+                        c.Bound(x => x.ReviewProgress).Title("Review Progress");
+                        c.Bound(x => x.ReviewStatus).Title("Review Status");
+                        if (Model.UserIsGenericReviewer)
+                        {
+                            c.Bound(x => x.ReviewerClaim).Title("Review Claimed By");
+                        }
+                        c.Bound(x => x.ReviewGridButtons).Title(" ").Width(90).AlignCenter();
+                    }))
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    function setViewMode(mode) {
+        $('#ViewMode').val(mode).trigger("change");
+    }
+</script>

@@ -1,0 +1,20 @@
+﻿@model List<LRS.Business.ContactObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("contacts").Columns(c =>
+    {
+        c.Bound(m => m.ContactId).Hidden();
+        c.Bound(m => m.MainId).Hidden();
+        c.Bound(m => m.Name);
+        c.Bound(m => m.Phone);
+        c.Bound(m => m.Location);
+        c.Bound(m => m.WorkOrg).Title("Org");
+        c.Bound(m => m.OrcidId).Title("Orcid ID");
+        c.Buttons(b =>
+        {
+            //b.Button("EditContact").Icon("edit").Type("primary").ToolTip("Edit Contact");
+            b.Button("AddContactToAuthor").Icon("retweet").Type("default").Title("Add as Author").ToolTip("Add Contact to Author List");
+            b.Button("RemoveContact").Icon("times").Type("danger").Title("Remove").ToolTip("Remove Contact");
+        }).Width(200).AlignCenter().NoWrap();
+    }).Clean()
+</div>

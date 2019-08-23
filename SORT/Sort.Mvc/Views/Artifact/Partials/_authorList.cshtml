@@ -1,0 +1,29 @@
+﻿@model List<Sort.Business.AuthorObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("authors").Columns(c =>
+    {
+        c.Bound(m => m.AuthorId).Hidden();
+        c.Bound(m => m.IsValid).Hidden();
+        c.Bound(m => m.FullName).Sortable(false).Render("AuthorNameRender");
+        c.Bound(m => m.Affiliation).Sortable(false);
+        c.Bound(m => m.OrcidId).Sortable(false);
+        c.Bound(m => m.IsPrimary).Title("Primary").Order(SortDir.desc).Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button("SetAuthorPrimary").Icon("user").Type("warning").ToolTip("Set as Primary Author");
+            b.Button("EditAuthor").Icon("edit").Type("primary").ToolTip("Edit Author");
+            b.Button("RemoveAuthor").Icon("times").Type("danger").ToolTip("Remove Author");
+        }).Width(50).AlignCenter();
+    }).Clean()
+</div>
+
+<script>
+    function AuthorNameRender(data, type, row) {
+        if (row["IsValid"] == "True") {
+            return data;
+        } else {
+            return "<i style=\"Color:Red;\">(Invalid) </i>" + data;
+        }
+    }
+</script>

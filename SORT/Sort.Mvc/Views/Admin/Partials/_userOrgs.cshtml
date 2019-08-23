@@ -1,0 +1,14 @@
+﻿@model Sort.Mvc.Models.UserOrgsModel
+
+
+@Html.Talon().Grid(Model.UserOrgs).Name("tblUserOrgs").Columns(c =>
+{
+    c.Bound(m => m.UserOrgId).Hidden();
+    c.Bound(m => m.EmployeeId).Hidden();
+    c.Bound(m => m.Org).Title("Org").Order(SortDir.asc);
+    c.Bound(m => m.OrgDesc).Title("Org Description");
+    c.Buttons(b =>
+    {
+        b.Button("RemoveUserOrg").Icon("times").Type("danger").ToolTip("Remove Org from User");
+    }).Width(30).AlignCenter();
+}).Clean()

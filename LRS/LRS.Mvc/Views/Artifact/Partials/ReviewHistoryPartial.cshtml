@@ -1,0 +1,21 @@
+﻿@model List<LRS.Business.ReviewHistoryObject>
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Review History</b></p>
+    <p>This is the reviews that have been canceled either individually, or by the Artifact being cancelled.</p>
+    <p>NOTE: Last Status is the status of the review when it was cancelled.  It's current status is Cancelled.</p>
+</div>
+<div>
+    <div class="form-group col-md-12">
+        @Html.Talon().Grid(Model).Name("reviewerHistory").Columns(c =>
+        {
+            c.Bound(m => m.ReviewId).Hidden();
+            c.Bound(m => m.ReviewerName).Title("Name").Sortable(false);
+            c.Bound(m => m.ReviewerTypeDisplayName).Title("Type").Sortable(false);
+            c.Bound(m => m.ReviewDate).Title("Date Reviewed").Sortable(false).Format("MM/dd/yyyy hh:mm tt");
+            c.Bound(m => m.ReviewStatusTxt).Title("Last Status").Sortable(false);
+            c.Bound(m => m.StatusDate).Title("Status Date").Sortable(false).Format("MM/dd/yyyy hh:mm tt");
+            c.Bound(m => m.CommentsTable).Title("Comments").Sortable(false);
+        }).Clean()
+    </div>
+</div>

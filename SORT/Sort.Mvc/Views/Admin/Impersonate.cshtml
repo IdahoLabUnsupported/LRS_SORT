@@ -1,0 +1,72 @@
+@using Sort.EmployeeHelper
+@model Sort.Mvc.Models.Admin.ImpersonateModel
+@{
+    ViewBag.Title = "Impersonate";
+}
+
+@section head {
+    <style>
+        dd.previmp {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            color: #446e9b;
+        }
+    </style>
+}
+
+<div class="col-md-8">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Impersonate</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.EmployeeId)
+                    <div class="col-md-10">
+                        @Html.EmployeeFor(m => m.EmployeeId, Url.Action("SearchEmployees", "Home"), new { autofocus = "autofocus" })
+                        @Html.ValidationMessageFor(m => m.EmployeeId)
+                    </div>
+                </div>
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-primary">Impersonate</button>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@if (Model.PreviousImpersonations != null && Model.PreviousImpersonations.Count > 0)
+{
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Recent</h3>
+            </div>
+            <div class="panel-body">
+                <dl>
+                    @foreach (var imp in Model.PreviousImpersonations)
+                    {
+                        <dd class="previmp" data-employeeId="@imp.Key">@imp.Value</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    @section scripts {
+        <script>
+            $(function () {
+                $('.previmp').click(function () {
+                    $('#EmployeeId').val($(this).data('employeeId'));
+                    $('#EmployeeId').closest('form').submit();
+                })
+            })
+        </script>
+    }
+}
+

@@ -1,0 +1,220 @@
+﻿@using Sort.Business
+@using Sort.EmployeeHelper
+@model SortMainObject
+
+@using (Html.BeginForm("TitleSave", "Artifact", FormMethod.Post, new { id = "TitleForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.HiddenFor(m => m.Title)
+
+    <div class="row text-nowrap">
+        <div class="col-md-8">@Html.BsLabelFor(m => m.Title, new { @class = "col-md-3" })</div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @Html.BsTextBoxFor(m => m.TitleStr, new { @readonly = "readonly", @tabindex = "-1" })
+            @Html.ValidationMessageFor(m => m.TitleStr, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <br />
+
+    <div class="row text-nowrap">
+        <div class="col-md-8">@Html.BsLabelFor(m => m.PublishTitle, new { @class = "required col-md-3" })</div>
+        <div class="col-md-4">@Html.BsLabelFor(m => m.PublicationDate, new { @class = "required col-md-3" })</div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            @Html.BsTextBoxFor(m => m.PublishTitle, new { @class = "check-required" })
+            @Html.ValidationMessageFor(m => m.PublishTitle, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-4">
+            @Html.BsDatePickerFor(m => m.PublicationDate, new { @class = "check-required" }).ClearButton(true).TodayButton(true)
+            @Html.ValidationMessageFor(m => m.PublicationDate, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <br />
+
+    <div class="row text-nowrap">
+        <div class="col-md-6">@Html.BsLabelFor(m => m.ProductType, new { @class = "required col-md-3" })</div>
+        <div class="col-md-3">@Html.BsLabelFor(m => m.ReportNumbers, new { @class = "col-md-3" })</div>
+        <div class="col-md-3">@Html.BsLabelFor(m => m.DoiNum, new { @class = "col-md-3" })</div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            @Html.BsDropDownListFor(m => m.ProductType, BsHelper.GetEnumSelectList<ProductTypeEnum>(), " --Select-- ", new { @class = "check-required" })
+            @Html.ValidationMessageFor(m => m.ProductType, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-3">
+            @Html.BsTextBoxFor(m => m.ReportNumbers)
+            @Html.ValidationMessageFor(m => m.ReportNumbers, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-3">
+            @Html.BsTextBoxFor(m => m.DoiNum)
+            @Html.ValidationMessageFor(m => m.DoiNum, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <br />
+
+    <div class="row text-nowrap">
+        <div class="col-md-4">@Html.BsLabelFor(m => m.Country, new { @class = "required col-md-3" })</div>
+        <div class="col-md-3">@Html.BsLabelFor(m => m.Language, new { @class = "required col-md-3" })</div>
+        <div class="col-md-5">@Html.BsLabelFor(m => m.AccessLimitation, new { @class = "required col-md-3" })</div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            @Html.BsDropDownListFor(m => m.Country, MemoryCache.CountryCodeList(), " --Select-- ", new { @class = "check-required" })
+            @Html.ValidationMessageFor(m => m.Country, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-3">
+            @Html.BsDropDownListFor(m => m.Language, MemoryCache.LanguageNameList(), " --Select-- ", new { @class = "check-required" })
+            @Html.ValidationMessageFor(m => m.Language, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-5">
+            @Html.BsDropDownListFor(m => m.AccessLimitation, BsHelper.GetEnumSelectList<AccessLimitationEnum>(new string[] { "OpenNet", "CopyrightRestrictions", "SecuritySensitiveInfo", "PatentPending", "LimitedRightsData", "AppliedTech", "ProgramDeterminedOfficialUseOnly", "NavalNuclearPropInfo" }), " --Select-- ", new { @class = "check-required" })
+            @Html.ValidationMessageFor(m => m.AccessLimitation, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <br />
+
+    <div class="panel-group">
+        <div class="row text-nowrap techwriter" hidden>
+            <div class="col-md-6 col-md-offset-6">@Html.BsLabelFor(m => m.TechWriterEmployeeId, new { @class = "required col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="pull-left">@Html.BsCheckBoxFor(m => m.HasTechWriter)</div>
+                <div class="pull-left;" style="padding-top: 10px;">This Artifact was edited by a technical writer.</div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="col-md-6 techwriter" hidden>
+                @Html.EmployeeFor(m => m.TechWriterEmployeeId, Url.Action("SearchEmployees", "Home"))
+                @Html.ValidationMessageFor(m => m.TechWriterEmployeeId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+
+        $('#ProductType').change(function () {
+            $('.nav-pills a[href=#conferenceTab]').closest('li').remove();
+            $('.nav-pills a[href=#journalTab]').closest('li').remove();
+            $('.nav-pills a[href=#publisherTab]').closest('li').remove();
+            $('.nav-pills a[href=#patentTab]').closest('li').remove();
+            switch ($('#ProductType').val()) {
+                case 'ConfEvent':
+                    $('.nav-pills a[href=#titleTab]').closest('li').after('<li role="presentation" data-savefunction="ConferenceSave"><a href="#conferenceTab" data-toggle="tab">Conference Info</a></li>');
+                    if ($.isFunction(window.CheckConferenceRequired)) {
+                        window.CheckConferenceRequired();
+                    }
+                    break;
+                case 'JournalArticle':
+                    $('.nav-pills a[href=#titleTab]').closest('li').after('<li role="presentation" data-savefunction="JournalSave"><a href="#journalTab" data-toggle="tab">Journal Info</a></li>');
+                    if ($.isFunction(window.CheckJournalRequired)) {
+                        window.CheckJournalRequired();
+                    }
+                    break;
+                case 'BookMonograph':
+                    $('.nav-pills a[href=#titleTab]').closest('li').after('<li role="presentation" data-savefunction="PublisherSave"><a href="#publisherTab" data-toggle="tab">Publisher Info</a></li>');
+                    if ($.isFunction(window.CheckPublisherRequired)) {
+                        window.CheckPublisherRequired();
+                    }
+                    break;
+                case 'Patent':
+                    $('.nav-pills a[href=#titleTab]').closest('li').after('<li role="presentation" data-savefunction="PatentSave"><a href="#patentTab" data-toggle="tab">Patent Info</a></li>');
+                    if ($.isFunction(window.CheckPatentRequired)) {
+                        window.CheckPatentRequired();
+                    }
+                    break;
+            }
+        });
+
+        $('#AccessLimitation').change(function () {
+            $('.nav-pills a[href=#openNetTab]').closest('li').remove();
+            $('.nav-pills a[href=#protectedDataTab]').closest('li').remove();
+            $('.nav-pills a[href=#officialUseTab]').closest('li').remove();
+            switch ($('#AccessLimitation').val()) {
+                case 'OpenNet':
+                    $('.nav-pills a[href=#abstractTab]').closest('li').before('<li role="presentation" data-savefunction="OpenNetSave"><a href="#openNetTab" data-toggle="tab">OpenNet Data</a></li>');
+                    if ($.isFunction(window.CheckOpenNetRequired)) {
+                        window.CheckOpenNetRequired();
+                    }
+                    break;
+                case 'ProtectedData':
+                    $('.nav-pills a[href=#abstractTab]').closest('li').before('<li role="presentation" data-savefunction="ProtectedDataSave"><a href="#protectedDataTab" data-toggle="tab">Protected Data</a></li>');
+                    if ($.isFunction(window.CheckProtectedDataRequired)) {
+                        window.CheckProtectedDataRequired();
+                    }
+                    break;
+                case 'ProgramDeterminedOfficialUseOnly':
+                    $('.nav-pills a[href=#abstractTab]').closest('li').before('<li role="presentation" data-savefunction="OfficialUseSave"><a href="#officialUseTab" data-toggle="tab">Official Use Data</a></li>');
+                    if ($.isFunction(window.CheckOfficialUseRequired)) {
+                        window.CheckOfficialUseRequired();
+                    }
+                    break;
+            }
+        });
+
+        $('#TitleForm .check-required').change(function () {
+            CheckTitleRequired();
+        });
+
+        $("#PublicationDate").closest('.input-group').on("dp.change", function (e) {
+            CheckTitleRequired();
+        });
+
+        $('#HasTechWriter').click(function () {
+            if (this.checked) {
+                $('.techwriter').show();
+            } else {
+                $('.techwriter').hide();
+                $('#TechWriterEmployeeId').val('').trigger('change');
+            }
+        });
+
+        InitTitle();
+    });
+
+    function InitTitle() {
+        $('#ProductType').trigger('change');
+        $('#AccessLimitation').trigger('change');
+        CheckTitleRequired();
+        if ($('#HasTechWriter').prop('checked') == true) {
+            $('.techwriter').show();
+        }
+    }
+
+    function TitleSave() {
+        $('.nav-pills a[href=#titleTab]').addClass('saving');
+        var form = $('#TitleForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#titleTab]').removeClass('saving');
+            });
+    }
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckTitleRequired() {
+        var requirMeet = true;
+        $('#TitleForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#titleTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#titleTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

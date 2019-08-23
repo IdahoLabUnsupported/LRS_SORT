@@ -1,0 +1,114 @@
+﻿@using Sort.Business
+@model Sort.Business.OpenNetObject
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>OpenNet Access Limitation</b></p>
+    <p>Place enter the information for the OpenNet Access Limitation.</p>
+    <p>OpenNet is a website supported by DOE's Office of Classification to provide access to declassified documents and other related information, 
+        in support of the National Openness Initiative.</p>
+    <p>See OpenNet policy and guidance <a href="https://www.osti.gov/opennet/" target="_blank">here</a>.</p>
+    <p>Declassification Date is required for Statuses of Declassified and Sanitized.</p>
+</div>
+
+@using (Html.BeginForm("OpenNetSave", "Artifact", FormMethod.Post, new {id = "OpenNetForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-4">@Html.BsLabelFor(m => m.AccessNumber, new {@class = "required col-md-3"})</div>
+                <div class="col-md-4">@Html.BsLabelFor(m => m.DocLocation, new {@class = "col-md-3"})</div>
+                <div class="col-md-4">@Html.BsLabelFor(m => m.FieldOfficeAym, new {@class = "col-md-3"})</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    @Html.BsTextBoxFor(m => m.AccessNumber, new { @class = "check-required"} )
+                </div>
+                <div class="col-md-4">
+                    @Html.BsTextBoxFor(m => m.DocLocation)
+                </div>
+                <div class="col-md-4">
+                    @Html.BsTextBoxFor(m => m.FieldOfficeAym)
+                </div>
+            </div>
+            <br/>
+
+            <div class="row text-nowrap">
+                <div class="col-md-4">@Html.BsLabelFor(m => m.DeclassificationStatus, new {@class = "required col-md-3"})</div>
+                <div class="col-md-4">@Html.BsLabelFor(m => m.DeclassificationDate, new {@class = "col-md-3"})</div>
+                <div class="col-md-4">@Html.BsLabelFor(m => m.Keywords, new {@class = "col-md-3"})</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    @Html.BsDropDownListFor(m => m.DeclassificationStatus, BsHelper.GetEnumSelectList<DeclassStatusEnum>(), " --Select-- ", new { @class = "check-required" })
+                </div>
+                <div class="col-md-4">
+                    @Html.BsDatePickerFor(m => m.DeclassificationDate).ClearButton(true).TodayButton(true)
+                </div>
+                <div class="col-md-4">
+                    @Html.BsTextBoxFor(m => m.Keywords)
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#OpenNetForm .check-required').change(function () {
+            CheckOpenNetRequired();
+        });
+
+        $("#DeclassificationDate").closest('.input-group').on("dp.change", function (e) {
+            CheckOpenNetRequired();
+        });
+
+        $('#DeclassificationStatus').change(function() {
+            var status = $('#DeclassificationStatus').val();
+            if (status == 'Declassified' || status == 'Sanitized') {
+                $('#DeclassificationDate').addClass('check-required');
+                $("label[for='DeclassificationDate']").addClass('required');
+            } else {
+                $('#DeclassificationDate').removeClass('check-required');
+                $("label[for='DeclassificationDate']").removeClass('required');
+            }
+
+            CheckOpenNetRequired();
+        });
+
+        $('#DeclassificationStatus').trigger('change');
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckOpenNetRequired() {
+        var requirMeet = true;
+        $('#OpenNetForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#openNetTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#openNetTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function OpenNetSave() {
+        $('.nav-pills a[href=#openNetTab]').addClass('saving');
+        var form = $('#OpenNetForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#openNetTab]').removeClass('saving');
+            });
+    }
+</script>

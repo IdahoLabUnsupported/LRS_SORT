@@ -1,0 +1,102 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.ArtifactModel
+    
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Keywords</b></p>
+    <p>Add one word or phrase at a time.</p>
+</div>
+
+@using (Html.BeginForm("AddKeyword", "Artifact", FormMethod.Post, new {id = "KeywordForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.Hidden("MetaDataId")
+    @Html.Hidden("MetaDataType", MetaDataTypeEnum.Keywords.ToString())
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-12">@Html.BsLabelFor(m => m.Keyword, new {@class = "required col-md-3"})</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-11">
+                    @Html.BsTextBoxFor(m => m.Keyword)
+                    @Html.ValidationMessageFor(m => m.Keyword, "", new {@class = "text-danger"})
+                </div>
+                <div class="col-md-1">
+                    <button type="button" onclick="AddKeyword()" class="btn btn-sm btn-success">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div id="KeywordPartial">
+    @Html.Partial("Partials/_keywordsList", Model.KeywordList)
+</div>
+
+<script>
+    $(document).ready(function () {
+        CheckKeywordRequired();
+    });
+
+    function AddKeyword() {
+        var id = $('#Sort_SortMainId').val();
+        var word = $('#Keyword').val();
+
+        if (id != '' && word != '') {
+            SetValidationMsg('Keyword', '');
+            var form = $('#KeywordForm');
+            $('.nav-pills a[href=#keywordsTab]').addClass('saving');
+
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    $("#KeywordPartial").html(data);
+                    CheckKeywordRequired();
+                    $("#Keyword").val('');
+                })
+                .fail(function (response) { SetValidationMsg('Keyword', "Unable to Save the Keyword.  Required fields missing or Invalid."); })
+                .always(function () { $('.nav-pills a[href=#keywordsTab]').removeClass('saving'); });
+
+        } else if (word == '') {
+            SetValidationMsg('Keyword', 'Keyword is required');
+        }
+    }
+
+    function RemoveKeyword(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Keyword',
+            content: 'Are you sure you wish to remove this keyword?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#keywordsTab]').addClass('saving');
+                $.post("/Artifact/RemoveKeyword",
+                    {
+                        id: row['MetaDataId']
+                    },
+                    function (data) {
+                        $("#KeywordPartial").html(data);
+                        CheckKeywordRequired();
+                    }).fail(function (response) { alert(response.responseText); })
+                    .always(function () { $('.nav-pills a[href=#keywordsTab]').removeClass('saving'); });
+            }
+        });
+    }
+
+    function CheckKeywordRequired() {
+        if ($('#keywords >tbody:last >tr').length > 0 &&
+            !$('#keywords >tbody:last >tr >td').hasClass('dataTables_empty')) {
+            $('.nav-pills a[href=#keywordsTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#keywordsTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

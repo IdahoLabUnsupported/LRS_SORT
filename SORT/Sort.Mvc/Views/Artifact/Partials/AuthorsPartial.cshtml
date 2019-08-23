@@ -1,0 +1,312 @@
+﻿@using Sort.Business
+@using Sort.EmployeeHelper
+@model Sort.Mvc.Models.IAuthor
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Authors</b></p>
+    <p>If the Company Affiliation selected is Idaho National Laboratory, the Name as it appears, or would appear, on the Publication must also be specified, 
+        since it may be different from the INL directory name.</p>
+    <p>If the Company Affiliation selected is Other or University, the author Name and Affiliation must be entered.</p>
+    <p>You must have one of the Authors marked as the Primary Author.</p>
+</div>
+
+@using (Html.BeginForm("AddAuthor", "Artifact", FormMethod.Post, new {id = "AuthorForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.HiddenFor(m => m.AuthorId)
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-4">@Html.BsLabelFor(m => m.AffiliationType, new { @class = "required col-md-3" })</div>
+                <div class="col-md-8">@Html.BsLabelFor(m => m.AffiliateEmployeeId, new { @class = "affiliateinl col-md-3 required", @hidden = "hidden" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    @Html.BsDropDownListFor(m => m.AffiliationType, BsHelper.GetEnumSelectList<AffiliationEnum>(), " --Select-- ", new { @class = "valid" })
+                    @Html.ValidationMessageFor(m => m.AffiliationType, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-8 affiliateinl" hidden>
+                    @Html.EmployeeFor(m => m.AffiliateEmployeeId, Url.Action("SearchEmployees", "Home"))
+                    @Html.ValidationMessageFor(m => m.AffiliateEmployeeId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="row text-nowrap">
+                <div class="col-md-5">@Html.BsLabelFor(m => m.AuthorName, new { @class = "required col-md-3" })</div>
+                <div class="col-md-5">@Html.BsLabelFor(m => m.Affiliation, new { @class = "required col-md-3" })</div>
+                <div class="col-md-2">@Html.BsLabelFor(m => m.AuthorOrcidId, new { @class = "col-md-3" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    @Html.BsTextBoxFor(m => m.AuthorName)
+                    @Html.ValidationMessageFor(m => m.AuthorName, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-5">
+                    @Html.BsTextBoxFor(m => m.Affiliation)
+                    @Html.ValidationMessageFor(m => m.AuthorName, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-2">
+                    @Html.BsTextBoxFor(m => m.AuthorOrcidId)
+                    @Html.ValidationMessageFor(m => m.AuthorOrcidId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div id="CountryDiv" class="panel-group" hidden="hidden">
+                <div class="row text-nowrap">
+                    <div class="col-md-6">@Html.BsLabelFor(m => m.CountryId, new { @class = "required col-md-3" })</div>
+                    <div class="col-md-6 stateDiv" hidden="hidden">@Html.BsLabelFor(m => m.StateId, new { @class = "required col-md-3" })</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        @Html.BsDropDownListFor(m => m.CountryId, MemoryCache.CountryList(true, Model.CountryId), "-- Select --")
+                        @Html.ValidationMessageFor(m => m.CountryId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 stateDiv" hidden="hidden">
+                        @Html.BsDropDownListFor(m => m.StateId, MemoryCache.StateList(true, Model.StateId), "-- Select --")
+                        @Html.ValidationMessageFor(m => m.StateId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+            <br />
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.BsCheckBoxFor(m => m.IsPrimary, "Primary Author")
+                    @Html.ValidationMessageFor(m => m.IsPrimary, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3">
+                    <div id="UpdateAuthorBtn" style="display:none;">
+                        <div class="pull-left" style="padding: 5px;">
+                            <button type="button" onclick="AddAuthor()" class="btn btn-sm btn-success">Update</button>
+                        </div>
+                        <div class="pull-left" style="padding: 5px;">
+                            <button type="button" onclick="ClearAuthorData()" class="btn btn-sm btn-primary">Cancel</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div id="AddAuthorBtn">
+                        <button type="button" onclick="AddAuthor()" class="btn btn-sm btn-success">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="AuthorsPartial">
+    @Html.Partial("Partials/_authorList", Model.Authors)
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('#AffiliationType').change(function () {
+            if ($('#AffiliationType').val() == 'INL') {
+                $('.affiliateinl').show();
+                $('#Affiliation').val('Idaho National Laboratory');
+                $('#Affiliation').attr('readonly', 'readonly');
+                $('#CountryDiv').hide();
+            } else {
+                $('.affiliateinl').hide();
+                $('#Affiliation').removeAttr('readonly');
+                if ($('#Affiliation').val() == 'Idaho National Laboratory') {
+                    $('#Affiliation').val('');
+                }
+                if ($('#AffiliationType').val() != '') {
+                    $('#CountryDiv').show();
+                    $('#CountryId').trigger('change');
+                } else {
+                    $('#CountryDiv').hide();
+                }
+            }
+        });
+
+        $('#CountryId').change(function() {
+            if ($('#CountryId').val() == 250) /*United States*/
+            {
+                $('.stateDiv').show();
+            } else {
+                $('.stateDiv').hide();
+            }
+        });
+
+        $('#AffiliateEmployeeId').change(function() {
+            if ($('#AffiliationType').val() == 'INL' && $('#AffiliateEmployeeId').val() != '') {
+                $.post("/Lookup/GetUserName",
+                    {
+                        id: $('#AffiliateEmployeeId').val()
+                    },
+                    function(data) {
+                        $('#AuthorName').val(data);
+                    }).fail(function (response) { if (response.responseText != '') { alert(response.responseText); } });
+            }
+        });
+
+        if ($('#AuthorId').val() != '') {
+            $('#AddAuthorBtn').hide();
+            $('#UpdateAuthorBtn').show();
+            $('#AffiliationType').trigger("change");
+        }
+        InitAuthor();
+
+        CheckAuthorRequired();
+    });
+
+    function InitAuthor() {
+        $('#AffiliationType').trigger('change');
+    }
+
+    function AddAuthor() {
+        if (CheckAuthorRequiredMeet() === true) {
+            $('.nav-pills a[href=#authorsTab]').addClass('saving');
+            var form = $('#AuthorForm');
+            SetValidationMsg('AuthorName', '');
+            SetValidationMsg('Affiliation', '');
+            SetValidationMsg('AffiliationType', '');
+            SetValidationMsg('AffiliateEmployeeId', '');
+            SetValidationMsg('CountryId', '');
+            SetValidationMsg('StateId', '');
+
+            $.post(form.attr('action'),
+                    form.serialize(),
+                    function(data) {
+                        $("#AuthorsPartial").html(data);
+                        CheckAuthorRequired();
+                        ClearAuthorData();
+                    })
+                .fail(function (response) { alert("Unable to Save the Author.  Required fields missing or Invalid."); })
+                .always(function () { $('.nav-pills a[href=#authorsTab]').removeClass('saving'); });
+        }
+    }
+
+    function RemoveAuthor(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Author',
+            content: 'Are you sure you wish to remove this author?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#authorsTab]').addClass('saving');
+                $.post("/Artifact/RemoveAuthor",
+                    {
+                        id: row['AuthorId']
+                    },
+                    function (data) {
+                        $("#AuthorsPartial").html(data);
+                        CheckAuthorRequired();
+                    }).fail(function (response) { alert(response.responseText); }).always(function () {$('.nav-pills a[href=#authorsTab]').removeClass('saving');});
+            }
+        });
+    }
+
+    function SetAuthorPrimary(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Set Primary',
+            content: 'Are you sure you wish to set "' + row['FullName'] + '" as the Primary Author?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-success',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#authorsTab]').addClass('saving');
+                $.post("/Artifact/SetPrimaryAuthor",
+                    {
+                        id: row['AuthorId']
+                    },
+                    function (data) {
+                        $("#AuthorsPartial").html(data);
+                        CheckAuthorRequired();
+                    }).fail(function (response) { alert(response.responseText); })
+                    .always(function () {$('.nav-pills a[href=#authorsTab]').removeClass('saving');});
+            }
+        });
+    }
+
+    function CheckAuthorRequiredMeet() {
+        var isValid = true;
+
+        if ($('#SortMainId').val() == '' || $('#SortMainId').val() == '0') return false;
+        
+        if ($('#AuthorName').val() == '') {
+            isValid = false;
+            SetValidationMsg('AuthorName', 'Author Name is required');
+        } else {
+            SetValidationMsg('AuthorName', '');
+        }
+
+        if ($('#AffiliationType').val() == '') {
+            isValid = false;
+            SetValidationMsg('AffiliationType', 'Company Affiliation is required');
+        } else {
+            SetValidationMsg('AffiliationType', '');
+        }
+
+        if ($('#AffiliationType').val() == 'INL' && $('#AffiliateEmployeeId').val() == '') {
+            isValid = false;
+            SetValidationMsg('AffiliateEmployeeId', 'Affiliate Employee is Required');
+        } else {
+            SetValidationMsg('AffiliateEmployeeId', '');
+        }
+
+        if ($('#Affiliation').val() == '') {
+            isValid = false;
+            SetValidationMsg('Affiliation', 'Affiliation is required');
+        } else {
+            SetValidationMsg('Affiliation', '');
+        }
+
+        if ($('#AffiliationType').val() != 'INL' && $('#CountryId').val() == '') {
+            isValid = false;
+            SetValidationMsg('CountryId', 'Country is required');
+        } else {
+            SetValidationMsg('CountryId', '');
+        }
+
+        if ($('#AffiliationType').val() != 'INL' && $('#CountryId').val() == 250 && $('#StateId').val() == '') {
+            isValid = false;
+            SetValidationMsg('StateId', 'State is required');
+        } else {
+            SetValidationMsg('StateId', '');
+        }
+
+        return isValid;
+    }
+
+    function ClearAuthorData() {
+        $('#AuthorId').val('');
+        $('#AffiliateEmployeeId').val('').text('').trigger('change');
+        $('#AffiliateEmployeeId_search').find('option').attr('selected', false).trigger('change');
+        $('#AffiliateEmployeeId_search').val('').text('').trigger('change');
+        $('#AffiliationType').val('').trigger('change');
+        $('#Affiliation').val('');
+        $('#AuthorOrcidId').val('');
+        $('#AuthorName').val('');
+        $('#IsPrimary').removeAttr('checked');
+        $('#AddAuthorBtn').show();
+        $('#UpdateAuthorBtn').hide();
+        $('#StateId').val('').trigger('change');
+        $("#CountryId").find('option[value=250]').attr("selected", 'selected').trigger('change');
+        $('#CountryDiv').hide();
+    }
+
+    function CheckAuthorRequired() {
+        if ($('#authors >tbody:last >tr').length > 0 &&
+            $("#authors tr td.sorting_1:contains('True')").length > 0 &&
+            !$('#authors >tbody:last >tr >td').hasClass('dataTables_empty') &&
+            $("#authors tr td:contains('(Invalid)')").length <= 0) {
+            $('.nav-pills a[href=#authorsTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#authorsTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

@@ -1,0 +1,65 @@
+@{ LRS.Business.UserObject curU = LRS.Business.UserObject.CurrentUser; }
+<ul class="nav navbar-nav navbar-right">
+    <li class="dropdown">
+        <a class="dropdown-toggle @(curU.Impersonating ? "user-impersonating" : "")" data-toggle="dropdown" href="#">
+            @if (curU.Impersonating)
+            {
+                <i class="fa fa-eye"></i>
+            }
+            @LRS.Business.UserObject.CurrentUser.FullName
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            @*<li>
+                <a href="@Url.Action("About", "Home")">
+                    <i class="fa fa-info-circle"></i>
+                    &nbsp;About
+                </a>
+            </li>*@
+            <li>
+                <a href="@Url.Action("Contact", "Home")">
+                    <i class="fa fa-envelope"></i>
+                    &nbsp;Contact
+                </a>
+            </li>
+            @if (User.IsInRole("Admin") || curU.Impersonating)
+            {
+                <li class="divider"></li>
+                <li>
+                    <a href="@Url.Action("Impersonate", "Admin")">
+                        <i class="fa fa-odnoklassniki"></i>
+                        &nbsp;Impersonate
+                    </a>
+                </li>
+            }
+            @if (curU.Impersonating)
+            {
+                <li>
+                    <a href="@Url.Action("EndImpersonate", "Admin")">
+                        <i class="fa fa-ban"></i>
+                        &nbsp;StopImpersonating
+                    </a>
+                </li>
+            }
+            @if (Config.ExecutionMode == LRS.Business.ExecutionMode.Local)
+            {
+                <li class="divider"></li>
+                List<string> employeeIds = new List<string>();
+                HttpCookie cookie = HttpContext.Current.Request.Cookies["RecentImpersonations"];
+                if (cookie != null)
+                {
+                    string recents = cookie.Value;
+                    employeeIds = recents.SplitClean();
+                    foreach (string employeeId in employeeIds.Take(8))
+                    {
+                        <li>
+                            <form id="impersonate-@employeeId" method="post" action="@Url.Action("Impersonate", "Admin")">@Html.AntiForgeryToken()<input type="hidden" name="employeeid" value="@employeeId" /></form>
+                            <a href="javascript:$('#impersonate-@employeeId').submit()"><i class="fa fa-eye"></i> @LRS.Business.EmployeeCache.GetFullName(employeeId)</a>
+
+                        </li>
+                    }
+                }
+            }
+        </ul>
+    </li>
+</ul>

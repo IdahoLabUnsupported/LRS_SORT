@@ -1,0 +1,27 @@
+﻿@model List<Sort.Business.ContactObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("contacts").Columns(c =>
+    {
+        c.Bound(m => m.ContactId).Hidden();
+        c.Bound(m => m.SortMainId).Hidden();
+        c.Bound(m => m.IsValid).Hidden();
+        c.Bound(m => m.FullName).Sortable(false).Render("ContactNameRender");
+        c.Bound(m => m.ContactType).Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button("EditContact").Icon("edit").Type("primary").ToolTip("Edit Contact");
+            b.Button("RemoveContact").Icon("times").Type("danger").ToolTip("Remove Contact");
+        }).Width(40).AlignCenter();
+    }).Clean()
+</div>
+
+<script>
+    function ContactNameRender(data, type, row) {
+        if (row["IsValid"] == "True") {
+            return data;
+        } else {
+            return "<i style=\"Color:Red;\">(Invalid) </i>" + data;
+        }
+    }
+</script>

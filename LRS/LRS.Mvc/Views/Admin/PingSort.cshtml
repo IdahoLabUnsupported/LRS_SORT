@@ -1,0 +1,60 @@
+﻿@model LRS.Business.PingResponse
+@{
+    ViewBag.Title = "Ping Sort";
+}
+
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            Sort Ping Response
+        </div>
+        <div class="panel-body form-horizontal">
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.Success)
+                <div class="col-md-10">
+                    @Html.BsTextBoxFor(m => m.Success, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.ErrorMessage)
+                <div class="col-md-10">
+                    @Html.BsTextAreaFor(m => m.ErrorMessage, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.StackTrace)
+                <div class="col-md-10">
+                    @Html.BsTextAreaFor(m => m.StackTrace, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.StatusCode)
+                <div class="col-md-10">
+                    @Html.BsTextBoxFor(m => m.StatusCode, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.Headers)
+                <div class="col-md-10">
+                    @Html.BsTextAreaFor(m => m.Headers, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.ReasonPhrase)
+                <div class="col-md-10">
+                    @Html.BsTextAreaFor(m => m.ReasonPhrase, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.BsLabelFor(m => m.RequestMessage)
+                <div class="col-md-10">
+                    @Html.BsTextAreaFor(m => m.RequestMessage, new { @ReadOnly = "readonly", @tabindex = "-1", @placeholder = "" })
+                </div>
+            </div>
+            <div class="col-md-offset-2 col-md-10">
+                <a href="@Url.Action("PingSort")" class="btn btn-xs btn-primary"><i class="fa fa-plus">Ping Again</i></a>
+            </div>
+        </div>
+    </div>
+</div>

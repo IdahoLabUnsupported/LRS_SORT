@@ -1,0 +1,73 @@
+﻿@using Sort.Business
+@model string
+
+<div class="modal fade" id="dvAddOrg" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="ClearAddOrg();">×</button>
+                <h4 class="modal-title" id="modalTitleAddOrg">Add Organization</h4>
+            </div>
+            @using (Html.BeginForm("SaveUserOrg", "admin", FormMethod.Post, new { id = "frmAddOrg" }))
+        {
+            @Html.Hidden("UserEmployeeId", Model.ToString())
+            <div class="modal-body">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"></h3>
+                    </div>
+                    <div class="panel-body form-horizontal">
+                        <div class="row text-nowrap">
+                            <div class="col-md-12">
+                                <label class="control-label col-sm-2" for="Org"><b style="color:red;">* </b>Organization</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                @Html.DropDownList("Org", UserOrgObject.AvailableOrgSelectList(), "--Select--", new { @class = "form-control" })
+                                <label id="AddOrgMsg" hidden><b style="color:red;">Role is required</b></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="SaveAddOrg();" class="btn btn-sm btn-primary">Add</button>
+                <button type="button" class="btn btn-sm btn-default" onclick="ClearAddOrg();">Cancel</button>
+            </div>
+    }
+        </div>
+    </div>
+</div>
+
+<script>
+    function SaveAddOrg() {
+        var org = $("#Org").val();
+
+        $("#AddOrgMsg").hide();
+
+        if (org.trim() != '') {
+            var form = $('#frmAddOrg');
+
+            $.post(form.attr('action'), form.serialize())
+                .always(function () {
+                    AfterAddOrgSave();
+                });
+        } else {
+            $("#AddOrgMsg").show();
+        }
+    }
+
+    function AfterAddOrgSave() {
+        ClearAddOrg();
+        if ($.isFunction(window.LoadUserOrgsPartial)) {
+            window.LoadUserOrgsPartial();
+        }
+    }
+
+    function ClearAddOrg() {
+        $('#dvAddOrg').modal('hide');
+        $("#AddOrgMsg").hide();
+        $("#Org").val('').trigger('change');
+    }
+</script>

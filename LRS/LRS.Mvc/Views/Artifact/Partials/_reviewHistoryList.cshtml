@@ -1,0 +1,55 @@
+﻿@model List<LRS.Business.ReviewHistoryObject>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="panel-title">
+            <div class="pull-left">
+                <a id="btnExpandHistory" href="#ReviewHistoryAreaGrid" title="Show/Hide Review History" data-toggle="collapse" style="font-size:1.25em; color:blue;">
+                    <i class="fa fa-arrow-down"></i>
+                </a>
+            </div>
+            <div class="pull-left">
+                <a href="#ReviewHistoryAreaGrid" data-toggle="collapse" style="color:darkblue; text-decoration:none;">
+                    @if (Model.Count == 1)
+                    {
+                        <div>&nbsp;&nbsp;[ 1 Review in History ]</div>
+                    }
+                    else
+                    {
+                        <div>&nbsp;&nbsp;[ @Model.Count Reviews in History ]</div>
+                    }
+                </a>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+    @if (Model.Count > 0)
+    {
+        <div id="ReviewHistoryAreaGrid" class="panel-collapse collapse">
+            <div class="panel-body panel-grid">
+                @Html.Talon().Grid(Model).Name("reviewerHistory").Columns(c =>
+                {
+                    c.Bound(m => m.ReviewId).Hidden();
+                    c.Bound(m => m.ReviewerName).Title("Name").Sortable(false);
+                    c.Bound(m => m.ReviewerTypeDisplayName).Title("Type").Sortable(false);
+                    c.Bound(m => m.ReviewDate).Title("Date Reviewed").Sortable(false).Format("MM/dd/yyyy");
+                    c.Bound(m => m.ReviewStatusTxt).Title("Status").Sortable(false).Render("ReviewStatusRender");
+                    c.Bound(m => m.StatusDate).Title("Status Date").Sortable(false).Format("MM/dd/yyyy");
+                    c.Bound(m => m.CommentsTable).Title("Comments").Sortable(false);
+                }).Clean()
+            </div>
+        </div>
+    }
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $("#ReviewHistoryAreaGrid").on("hide.bs.collapse", function () {
+            $("#btnExpandHistory").html('<i class="fa fa-arrow-down"></i>');
+        });
+        $("#ReviewHistoryAreaGrid").on("show.bs.collapse", function () {
+            $("#btnExpandHistory").html('<i class="fa fa-arrow-up"></i>');
+        });
+    });
+</script>

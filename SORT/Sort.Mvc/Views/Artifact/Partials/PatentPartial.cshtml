@@ -1,0 +1,65 @@
+﻿@using Sort.Business
+@model SortMainObject
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Patent</b></p>
+    <p>Place enter the Assignee for the patent.</p>
+</div>
+
+@using (Html.BeginForm("PatentSave", "Artifact", FormMethod.Post, new {id = "PatentForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+
+    <div class="row text-nowrap">
+        <div class="col-md-8">@Html.BsLabelFor(m => m.PatentAssignee, new {@class = "required col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            @Html.BsTextBoxFor(m => m.PatentAssignee, new { @class = "check-required" })
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#PatentForm .check-required').change(function () {
+            CheckPatentRequired();
+        });
+
+        CheckPatentRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckPatentRequired() {
+        var requirMeet = true;
+        $('#PatentForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#patentTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#patentTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function PatentSave() {
+        $('.nav-pills a[href=#patentTab]').addClass('saving');
+        var form = $('#PatentForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#patentTab]').removeClass('saving');
+            });
+    }
+</script>

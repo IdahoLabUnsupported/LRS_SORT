@@ -1,0 +1,12 @@
+﻿@model List<LRS.Business.ReviewCommentObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("reviewComments").Columns(c =>
+    {
+        c.Bound(m => m.ReviewId).Hidden();
+        c.Bound(m => m.ReviewCommentId).Hidden();
+        c.Bound(m => m.ReviewerName).Sortable(false);
+        c.Bound(m => m.EntryDate).Format("MM/dd/yyyy").Sortable(false);
+        c.Bound(m => m.Comment).Title("Comment").Sortable(false);
+    }).Clean()
+</div>

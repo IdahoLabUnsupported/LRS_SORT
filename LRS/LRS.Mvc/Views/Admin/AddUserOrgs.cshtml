@@ -1,0 +1,42 @@
+﻿@using LRS.Business
+@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.UserOrgsModel
+
+@{
+    ViewBag.Title = "Add Orgs to Org Manager";
+    Breadcrumb.Add("Home", "/")
+        .Next("Users", Url.Action("Users"))
+        .Next("Edit User", Url.Action("EditUser", new { id = Model.UserEmployeeId }))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Add Orgs to Org Manager</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.HiddenFor(m => m.UserEmployeeId)
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.UserName)
+                    <div class="col-md-10">
+                        @Html.BsTextBoxFor(m => m.UserName, new { @readonly = "readonly", @tabindex = "-1" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.Org)
+                    <div class="col-md-10">
+                        @Html.BsMultipleChosenFor(m => m.Org, UserOrgObject.AvailableOrgSelectList())
+                        @Html.ValidationMessageFor(m => m.Org)
+                    </div>
+                </div>
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@Url.Action("EditUser", new {id = Model.UserEmployeeId})" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,242 @@
+﻿@using LRS.Business
+@model LRS.Mvc.Models.IntellectualModel
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Intellectual Property</b></p>
+    <p>Employees are required to promptly disclose potentially patentable information through the Invention Disclosure Record (IDR) process.</p>
+    <p>If you have submitted an e-IDR as part of this process, please add the number below.</p>
+</div>
+@using (Html.BeginForm("AddIntellectual", "Artifact", FormMethod.Post, new { id = "IntellectualForm", @onsubmit = "return false" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MainId)
+    @Html.HiddenFor(m => m.IntellectualPropertyId)
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="panel-group">
+                <div class="row text-nowrap">
+                    <div class="col-md-5">@Html.BsLabelFor(m => m.IdrNumber, new { @class = "required col-md-3" })</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        @Html.BsTextBoxFor(m => m.IdrNumber)
+                        @Html.ValidationMessageFor(m => m.IdrNumber, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-2">
+                        <button id="idrVerifyBtn" type="button" onclick="VerifyIdrNumber()" class="btn btn-sm btn-primary" style="height: 45px;">Verify IDR Number</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-group">
+                <div class="row text-nowrap">
+                    <div class="col-md-4">@Html.BsLabelFor(m => m.DocketNumber, new { @class = "col-md-3" })</div>
+                    <div class="col-md-4">@Html.BsLabelFor(m => m.Aty, new { @class = "col-md-3" })</div>
+                    <div class="col-md-4">@Html.BsLabelFor(m => m.Ae, new { @class = "col-md-3" })</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        @Html.BsTextBoxFor(m => m.DocketNumber, new { @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-4">
+                        @Html.BsTextBoxFor(m => m.Aty, new { @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-4">
+                        @Html.BsTextBoxFor(m => m.Ae, new { @readonly = "readonly" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-group">
+                <div class="row text-nowrap">
+                    <div class="col-md-8">@Html.BsLabelFor(m => m.Title, new { @class = "col-md-3" })</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        @Html.BsTextBoxFor(m => m.Title, new { @readonly = "readonly" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-group">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div id="UpdateIntellectualBtn" style="display: none;">
+                            <div class="pull-left" style="padding: 5px;">
+                                <button id="updateItBtn" type="button" onclick="AddIntellectual()" class="btn btn-sm btn-success" disabled="disabled">Update</button>
+                            </div>
+                            <div class="pull-left" style="padding: 5px;">
+                                <button type="button" onclick="CancelIntellectual()" class="btn btn-sm btn-primary">Cancel</button>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div id="AddIntellectualBtn">
+                            <button id="addItBtn" type="button" onclick="AddIntellectual()" class="btn btn-sm btn-success" @*disabled="disabled"*@>Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div id="IntellectualsPartial">
+    @Html.Partial("Partials/_intellectualList", Model.Intellectuals)
+</div>
+<script>
+    $(document).ready(function () {
+        CheckIntellectualRequired();
+
+        if ($('#IntellectualPropertyId').val() != '') {
+            $('#AddIntellectualBtn').hide();
+            $('#UpdateIntellectualBtn').show();
+        }
+
+        $('#IdrNumber').keyup(function() {
+            //$('#addItBtn').prop("disabled", true);
+            //$('#updateItBtn').prop("disabled", true);
+        });
+    });
+
+    function AddIntellectual() {
+        var id = $('#MainId').val();
+        var sn = $('#IdrNumber').val();
+        
+        if (id != '' && sn != '') {
+            $('.nav-pills a[href=#intellectualsTab]').addClass('saving');
+            var form = $('#IntellectualForm');
+            SetValidationMsg('IdrNumber', '');
+            
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    if (data != null && data != '') {
+                        $("#IntellectualsPartial").html(data);
+                        CheckIntellectualRequired();
+                        CancelIntellectual();
+                    } else {
+                        alert("Unable to Save the Intellectual Property.  Required fields missing or Invalid.");
+                    }
+                })
+                .fail(function (response) { alert("Unable to Save the Intellectual Property.  Required fields missing or Invalid."); })
+                .always(function () { setTimeout(function () { $('.nav-pills a[href=#intellectualsTab]').removeClass('saving'); }, 500); });
+
+        } else {
+            if (sn == '') {
+                SetValidationMsg('IdrNumber', 'Intellectual IDR Number is required');
+            } else {
+                SetValidationMsg('IdrNumber', '');
+            }
+            
+        }
+    }
+
+    function VerifyIdrNumber() {
+        $('#DocketNumber').val('');
+        $('#Aty').val('');
+        $('#Ae').val('');
+        $('#Title').val('');
+        //$('#addItBtn').prop("disabled", true);
+        //$('#updateItBtn').prop("disabled", true);
+        $('#idrVerifyBtn').removeClass("goodcheck");
+        $('#idrVerifyBtn').removeClass("badcheck");
+        $('#idrVerifyBtn').addClass("loader");
+
+        $.post("/Lookup/GetIpdsInfo",
+            {
+                id: $('#IdrNumber').val()
+            },
+            function (data) {
+                $('#idrVerifyBtn').removeClass("loader");
+                if (data != null) {
+                    if (data.DocketNumber != null) {
+                        $('#idrVerifyBtn').addClass("goodcheck");
+                        $('#addItBtn').prop("disabled", false);
+                        $('#updateItBtn').prop("disabled", false);
+
+                        $('#DocketNumber').val(data.DocketNumber);
+                        $('#Title').val(data.Title);
+                        $('#Aty').val(data.OrcidIdAty);
+                        $('#Ae').val(data.OrcidIdAe);
+                    } else {
+                        $('#idrVerifyBtn').addClass("badcheck");
+                    }
+                } else {
+                    $('#idrVerifyBtn').addClass("badcheck");
+                }
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); $('#idrVerifyBtn').addClass("badcheck"); $('#idrVerifyBtn').removeClass("loader"); });
+    }
+
+    function GetAtyOrcid(atyEmployeeId) {
+        $.post("/Lookup/GetUserInfo",
+            {
+                id: atyEmployeeId
+            },
+            function(data) {
+                $('#Aty').val(data.OrcidId);
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+
+    function GetAeOrcid(aeEmployeeId) {
+        $.post("/Lookup/GetUserInfo",
+            {
+                id: aeEmployeeId
+            },
+            function (data) {
+                $('#Ae').val(data.OrcidId);
+            }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); });
+    }
+    
+    function CancelIntellectual() {
+        $('#IntellectualPropertyId').val('');
+        $('#IdrNumber').val('');
+        $('#DocketNumber').val('');
+        $('#Title').val('');
+        $('#Aty').val('');
+        $('#Ae').val('');
+        $('#AddIntellectualBtn').show();
+        $('#UpdateIntellectualBtn').hide();
+        //$('#addItBtn').prop("disabled", true);
+        //$('#updateItBtn').prop("disabled", true);
+        $('#idrVerifyBtn').removeClass("goodcheck");
+        $('#idrVerifyBtn').removeClass("badcheck");
+        $('#idrVerifyBtn').removeClass("loader");
+    }
+
+    function RemoveIntellectual(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Intellectual Property',
+            content: 'Are you sure you wish to remove this Intellectual Property?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#intellectualsTab]').addClass('saving');
+                $.post("/Artifact/RemoveIntellectual",
+                    {
+                        id: row['IntellectualPropertyId']
+                    },
+                    function (data) {
+                        $("#IntellectualsPartial").html(data);
+                        CheckIntellectualRequired();
+                    }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); })
+                    .always(function () { setTimeout(function () { $('.nav-pills a[href=#intellectualsTab]').removeClass('saving'); }, 500); });
+            }
+        });
+    }
+
+    function CheckIntellectualRequired() {
+        //if ($('#intellectuals >tbody:last >tr').length > 0 &&
+        //    !$('#intellectuals >tbody:last >tr >td').hasClass('dataTables_empty') &&
+        //    $("#intellectuals tr td:contains('(Invalid)')").length <= 0) {
+        //    $('.nav-pills a[href=#intellectualsTab]').removeClass('required');
+        //} else {
+        //    $('.nav-pills a[href=#intellectualsTab]').addClass('required');
+        //}
+        //if ($.isFunction(window.CheckForCompletion)) {
+        //    window.CheckForCompletion();
+        //}
+    }
+    
+</script>

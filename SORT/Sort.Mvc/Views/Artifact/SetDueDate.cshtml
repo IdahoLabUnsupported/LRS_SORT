@@ -1,0 +1,51 @@
+﻿@using Sort.Business
+@using Sort.Mvc.Classes
+@model Sort.Mvc.Models.DueDateModel
+@{
+    ViewBag.Title = "Set Due Date for " + Model.Title;
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+
+@using (Html.BeginForm("SetDueDate", "Artifact", FormMethod.Post, new { id = "dueDateForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.HiddenFor(m => m.AltLocation)
+
+    <div class="col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Due Date for @Model.Title</h3>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-12">
+                    @Html.BsLabelFor(m => m.DueDate, new {@class = "required col-md-3"})
+                    <div class="col-md-10">
+                        @Html.BsDatePickerFor(m => m.DueDate).ClearButton(true).TodayButton(true)
+                        @Html.ValidationMessageFor(m => m.DueDate, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="col-md-10">
+                        @Html.BsCheckBoxFor(m => m.SendReminder, "Send Reminder Email")
+                        @Html.ValidationMessageFor(m => m.SendReminder, "", new {@class = "text-danger"})
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="col-md-10">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        @if (Model.AltLocation.HasValue && Model.AltLocation.Value)
+                        {
+                            <a href="@Url.Action("Index", "Artifact", new {id = Model.SortMainId})" class="btn btn-default">Cancel</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-default">Cancel</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

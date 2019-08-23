@@ -1,0 +1,487 @@
+﻿@using LRS.Business
+@using LRS.EmployeeHelper
+@model MainObject
+
+@using (Html.BeginForm("TitleSilentSave", "Artifact", FormMethod.Post, new { id = "TitleForm", @onsubmit = "return false" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MainId)
+    @Html.Hidden("DocTypeChange")
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-4">@Html.BsLabelFor(m => m.StiNumber, new { @class = "col-md-3" })</div>
+            <div class="col-md-4">@Html.BsLabelFor(m => m.Revision, new { @class = "col-md-3" })</div>
+            <div class="col-md-4">@Html.BsLabelFor(m => m.OwnerName, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                @Html.BsTextBoxFor(m => m.StiNumber, new { @readonly = "readonly", @tabindex = "-1" })
+            </div>
+            <div class="col-md-4">
+                @Html.BsTextBoxFor(m => m.RevisionStr, new { @readonly = "readonly", @tabindex = "-1" })
+            </div>
+            <div class="col-md-4">
+                @Html.BsTextBoxFor(m => m.OwnerName, new { @readonly = "readonly", @tabindex = "-1" })
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.Title, new { @class = "required col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.Title, new { @class = "check-required" })
+                @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-4">@Html.BsLabelFor(m => m.DocumentType, new { @class = "required col-md-3" })</div>
+            <div class="col-md-8">@Html.BsLabelFor(m => m.RelatedSti, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                @Html.BsDropDownListFor(m => m.DocumentType, Extensions.GetEnumSelectList<DocumentTypeEnum>(new[] { (Current.IsDoeUser ? "" : "DoeID"), (Current.IsHistorical ? "" : "Historical") }), " --Select-- ", new { @class = "check-required" })
+                @Html.ValidationMessageFor(m => m.DocumentType, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-8">
+                @Html.BsTextBoxFor(m => m.RelatedSti)
+                @Html.ValidationMessageFor(m => m.RelatedSti, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div id="JournalDiv" class="panel-group" hidden="hidden">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.JournalName, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.JournalName)
+            </div>
+        </div>
+    </div>
+
+    <div id="LimitedDiv" class="panel-group" hidden="hidden">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.LimitedExp, new { @class = "required col-md-12" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.LimitedExp)
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.ContainsSciInfo)
+                @*<div class="pull-left">@Html.BsCheckBoxFor(m => m.ContainsSciInfo)</div>*@
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnCsiYes" onclick="SetYesNo('Csi', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnCsiNo" onclick="SetYesNo('Csi', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left">Does this Artifact contain Scientific or Technical Information?</div>
+                <div class="pull-left"><button type="button" onclick="ShowCsiInfo();" class="btn btn-link btn-xs"><i class="fa fa-info-circle" style="color: blue;"></i></button></div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        @*<div id="techDataDiv" class="row" hidden="hidden">
+            <div class="col-md-12">
+                <div class="pull-left">@Html.BsCheckBoxFor(m => m.ContainsTechData)</div>
+                <div class="pull-left;" style="padding-top: 10px;">The information to be released does contain <a onclick="ShowTechData(); ">technology, technical data</a>, or software?</div>
+                <div class="clearfix"></div>
+            </div>
+
+        </div>*@
+        <div class="row">
+            @*id="publicDiv" hidden="hidden">*@
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.TechDataPublic)
+                @*<div class="pull-left">@Html.BsCheckBoxFor(m => m.TechDataPublic)</div>*@
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnTdpYes" onclick="SetYesNo('Tdp', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnTdpNo" onclick="SetYesNo('Tdp', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left;">Has the project or program sponsor approved and intended for this information to be made publicly available, or unlimited from public release?</div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <div id="OuoDiv" style="font-style: italic; font-weight: bold;">If Official Use Only or Limited distribution is required for this item, please select the appropriate exemption(s) to apply. OUO marking and limitations on distribution are the responsibility of the submitting party as defined in LWP-11202.</div>
+            </div>
+        </div>
+        <br />
+        
+        @if (UserObject.CurrentUser.IsInAnyRole("Admin,ReleaseOfficial"))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    @Html.HiddenFor(m => m.Ouo3)
+                    <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo3Yes" onclick="SetYesNo('Ouo3', true);" type="button" class="btn btn-xs">Yes</button></div>
+                    <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo3No" onclick="SetYesNo('Ouo3', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                    <div class="pull-left;">OUO – FOIA Exemption 3 Export</div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        }
+
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.Ouo3b)
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo3bYes" onclick="SetYesNo('Ouo3b', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo3bNo" onclick="SetYesNo('Ouo3b', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left;">OUO - FOIA Exemption 3: Information protected by federal laws if the statute either (1) requires that the information be withheld from the public or (2) establishes a criteria for withholding. (Atomic Energy Act, Archaeological Information, CRADA, Export Controlled, Applications for Patents).</div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.Ouo4)
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo4Yes" onclick="SetYesNo('Ouo4', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo4No" onclick="SetYesNo('Ouo4', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left;">OUO - FOIA Exemption 4: Contains commercial/proprietary information such as trade secrets, financial information, contract proposals, supplier lists</div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.Ouo5)
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo5Yes" onclick="SetYesNo('Ouo5', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo5No" onclick="SetYesNo('Ouo5', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left;">OUO - FOIA Exemption 5: Privileged information such as predecisional or proposed policy information.</div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.Ouo6)
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo6Yes" onclick="SetYesNo('Ouo6', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo6No" onclick="SetYesNo('Ouo6', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left;">OUO – FOIA Exemption 6: Personal Privacy information: Contains Personally Identifiable Information such as social security numbers, birth dates, medical or personal financial information.</div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                @Html.HiddenFor(m => m.Ouo7)
+                <div class="pull-left" style="margin: -1px 0 5px 0;"><button id="btnOuo7Yes" onclick="SetYesNo('Ouo7', true);" type="button" class="btn btn-xs">Yes</button></div>
+                <div class="pull-left" style="margin: -1px 5px 5px 0;"><button id="btnOuo7No" onclick="SetYesNo('Ouo7', false);" type="button" class="btn btn-xs btn-warning">No</button></div>
+                <div class="pull-left;">OUO – FOIA Exemption 7: Law enforcement and security information including information defined in security manuals and classification guides as determined by a derivative classifier.</div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        
+       
+    </div>
+
+    <div id="Ouo7Div" class="panel-group" hidden="hidden">
+        <div class="row text-nowrap">
+            <div class="col-md-5">@Html.BsLabelFor(m => m.Ouo7EmployeeId, new { @class = "required col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                @Html.EmployeeFor(m => m.Ouo7EmployeeId, Url.Action("SearchEmployees", "lookup"))
+            </div>
+        </div>
+    </div>
+
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#TitleForm .check-required').change(function () {
+            CheckTitleRequired();
+        });
+
+        $('#Ouo7EmployeeId').change(function () {
+            CheckTitleRequired();
+        });
+
+        $('#LimitedExp').change(function () {
+            CheckTitleRequired();
+        });
+
+        $('#RelatedSti').change(function () {
+            CheckTitleRequired();
+        });
+
+        //$('#ContainsSciInfo').click(function () {
+        //    if (this.checked) {
+        //        $('#techDataDiv').show();
+        //    } else {
+        //        $('#techDataDiv').hide();
+        //        $('#publicDiv').hide();
+        //        $('#ContainsTechData').prop('checked', false);
+        //        $('#TechDataPublic').prop('checked', false);
+        //    }
+        //});
+
+        //$('#ContainsTechData').click(function () {
+        //    if (this.checked) {
+        //        $('#publicDiv').show();
+        //    } else {
+        //        $('#publicDiv').hide();
+        //        $('#TechDataPublic').prop('checked', false);
+        //    }
+        //});
+
+        $('#DocumentType').change(function () {
+            $('#DocTypeChange').val('True');
+            SetupDocumentType();
+        });
+
+        InitTitle();
+    });
+
+    function SetYesNo(data, value) {
+        switch (data) {
+            case 'Csi':
+                $('#ContainsSciInfo').val(value);
+                $('#btnCsiYes').removeClass('btn-warning');
+                $('#btnCsiNo').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnCsiYes').addClass('btn-warning');
+                } else {
+                    $('#btnCsiNo').addClass('btn-warning');
+                }
+                break;
+            case 'Tdp':
+                $('#TechDataPublic').val(value);
+                $('#btnTdpYes').removeClass('btn-warning');
+                $('#btnTdpNo').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnTdpYes').addClass('btn-warning');
+                } else {
+                    $('#btnTdpNo').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo3':
+                $('#Ouo3').val(value);
+                $('#btnOuo3Yes').removeClass('btn-warning');
+                $('#btnOuo3No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo3Yes').addClass('btn-warning');
+                } else {
+                    $('#btnOuo3No').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo3b':
+                $('#Ouo3b').val(value);
+                $('#btnOuo3bYes').removeClass('btn-warning');
+                $('#btnOuo3bNo').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo3bYes').addClass('btn-warning');
+                } else {
+                    $('#btnOuo3bNo').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo4':
+                $('#Ouo4').val(value);
+                $('#btnOuo4Yes').removeClass('btn-warning');
+                $('#btnOuo4No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo4Yes').addClass('btn-warning');
+                } else {
+                    $('#btnOuo4No').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo5':
+                $('#Ouo5').val(value);
+                $('#btnOuo5Yes').removeClass('btn-warning');
+                $('#btnOuo5No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo5Yes').addClass('btn-warning');
+                } else {
+                    $('#btnOuo5No').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo6':
+                $('#Ouo6').val(value);
+                $('#btnOuo6Yes').removeClass('btn-warning');
+                $('#btnOuo6No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo6Yes').addClass('btn-warning');
+                } else {
+                    $('#btnOuo6No').addClass('btn-warning');
+                }
+                break;
+            case 'Ouo7':
+                $('#Ouo7').val(value);
+                $('#btnOuo7Yes').removeClass('btn-warning');
+                $('#btnOuo7No').removeClass('btn-warning');
+                if (value == true || value == 'True') {
+                    $('#btnOuo7Yes').addClass('btn-warning');
+                    $('#Ouo7Div').show();
+                } else {
+                    $('#btnOuo7No').addClass('btn-warning');
+                    $('#Ouo7Div').hide();
+                }
+                break;
+        }
+        CheckTitleRequired();
+    }
+
+    function InitTitle() {
+        SetupDocumentType();
+        CheckTitleRequired();
+        SetYesNo('Csi', $('#ContainsSciInfo').val());
+        SetYesNo('Tdp', $('#TechDataPublic').val());
+        SetYesNo('Ouo3', $('#Ouo3').val());
+        SetYesNo('Ouo3b', $('#Ouo3b').val());
+        SetYesNo('Ouo4', $('#Ouo4').val());
+        SetYesNo('Ouo5', $('#Ouo5').val());
+        SetYesNo('Ouo6', $('#Ouo6').val());
+        SetYesNo('Ouo7', $('#Ouo7').val());
+        //if ($('#ContainsSciInfo').prop('checked') == true) {
+        //    $('#techDataDiv').show();
+        //    if ($('#ContainsTechData').prop('checked') == true) {
+        //        $('#publicDiv').show();
+        //    }
+        //}
+    }
+
+    function SetupDocumentType() {
+        $('#JournalDiv').hide();
+        $('#LimitedDiv').hide();
+        $('#markCompleteBtn').hide();
+        $('#OuoDiv').removeClass('required');
+        $("label[for='RelatedSti']").removeClass('required');
+        $('.nav-pills a[href=#conferenceTab]').closest('li').remove();
+        if ($('#Status').val() == 'ReviewNotRequired') {
+            $('#Status').val('New');
+        }
+
+        //$('.nav-pills a[href=#publisherTab]').closest('li').remove();
+        //$('.nav-pills a[href=#patentTab]').closest('li').remove();
+        switch ($('#DocumentType').val()) {
+            case 'Conference':
+                $('.nav-pills a[href=#titleTab]').closest('li').after('<li role="presentation" data-savefunction="ConferenceSave"><a href="#conferenceTab" data-toggle="tab">Conference Info</a></li>');
+                if ($.isFunction(window.CheckConferenceRequired)) {
+                    window.CheckConferenceRequired();
+                }
+                break;
+            case 'Journal':
+                $('#JournalDiv').show();
+                break;
+            case 'Limited':
+                $('#LimitedDiv').show();
+                $('#OuoDiv').addClass('required');
+                break;
+            case 'Internal':
+            case 'DoeId':
+                if ($('#Status').val() != 'Completed') {
+                    $('#markCompleteBtn').show();
+                    $('#Status').val('ReviewNotRequired');
+                }
+                break;
+            case 'Historical':
+                $("label[for='RelatedSti']").addClass('required');
+                break;
+        }
+
+        if ($.isFunction(window.CheckReviewRequired)) {
+            window.CheckReviewRequired();
+        }
+    }
+
+    function TitleSave() {
+        $('.nav-pills a[href=#titleTab]').addClass('saving');
+        var form = $('#TitleForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                setTimeout(function () { $('.nav-pills a[href=#titleTab]').removeClass('saving'); }, 500);
+                if ($('#DocTypeChange').val() == 'True') {
+                    LoadStiNumber();
+                }
+            });
+    }
+
+    function ShowCsiInfo() {
+        BootstrapDialog.show({
+            title: 'Scientific or Technical Information definition',
+            type: BootstrapDialog.TYPE_PRIMARY,
+            message: 'Information in any format or medium, which contain findings and technological innovations resulting from research and development (R&D) efforts and scientific and technological work of scientists, researchers, and engineers, whether Federal employee, contractor, or financial assistance recipient. STI also conveys the results of demonstration and commercial application activities as well as experiments, observations, simulations, studies, and analyses.',
+            buttons: [{
+                label: 'Ok',
+                cssClass: 'btn-primary',
+                action: function (dialogRef) {
+                    dialogRef.close();
+                }
+            }]
+        });
+    }
+
+    function CheckOuo(ouo) {
+        var itemVal = $('#' + ouo).val();
+
+        if (itemVal == true || itemVal == 'true' || itemVal == 'True') {
+            return true;
+        }
+
+        return false;
+    }
+
+    function LoadStiNumber() {
+        $.post("/Artifact/GetStiNumber",
+            {
+                id: $('#MainId').val()
+            },
+            function (data) {
+                $("#StiNumber").val(data);
+                $('#DocTypeChange').val('');
+            });
+    }
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckTitleRequired() {
+        var requirMeet = true;
+        $('#TitleForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if (requirMeet == true) {
+            if (CheckOuo('Ouo7') == true) {
+                if ($('#Ouo7EmployeeId').val() == '') {
+                    requirMeet = false;
+                }
+            }
+        }
+
+        if (requirMeet == true && $('#DocumentType').val() == "Limited") {
+            if ($('#LimitedExp').val() == '' || (CheckOuo('Ouo3b') == false && CheckOuo('Ouo4') == false && CheckOuo('Ouo5') == false && CheckOuo('Ouo6') == false && CheckOuo('Ouo7') == false)) {
+                requirMeet = false;
+            }
+        }
+
+        if (requirMeet == true && $('#DocumentType').val() == "Historical" && $('#RelatedSti').val() == '') {
+            requirMeet = false;
+        }
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#titleTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#titleTab]').addClass('required');
+        }
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+</script>

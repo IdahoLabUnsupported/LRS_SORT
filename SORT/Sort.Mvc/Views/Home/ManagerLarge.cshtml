@@ -1,0 +1,222 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.HomeModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@section head{
+    <script src="~/Scripts/Chart.min.js"></script>
+    <style>
+        .chart-legend {
+            position: absolute;
+            top: 50px;
+            left: 0;
+        }
+
+            .chart-legend ul {
+                list-style: none;
+                width: 100%;
+                margin: 10px auto 0;
+            }
+
+            .chart-legend li {
+                text-indent: 35px;
+                text-align: left;
+                line-height: 24px;
+                position: relative;
+                cursor: pointer;
+                cursor: hand;
+            }
+
+            .chart-legend div {
+                width: 30px;
+                height: 16px;
+                position: absolute;
+                left: 0;
+                top: 3px;
+                content: "";
+                border: 1px black solid;
+                margin-left: 0;
+            }
+
+        #ViewMode {
+            height: 25px !important;
+            line-height: 25px !important;
+            padding: 0;
+        }
+
+        .lImported {
+            background-color: #00ffcc;
+        }
+
+        .lApproved {
+            background-color: #e00f0f;
+        }
+
+        .lCompletedNeedReview {
+            background-color: #0a0aca;
+        }
+
+        .lCompleted {
+            background-color: #4ee00f;
+        }
+
+        .lPublished {
+            background-color: #bfbfbf;
+        }
+
+        .lCancelled {
+            background-color: #000000;
+        }
+    </style>
+}
+
+@Html.Hidden("FailMessage", TempData["FailMessage"])
+
+
+<div class="col-lg-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="pull-left">
+                <h3 class="panel-title">Artifacts</h3>
+            </div>
+            @if (UserObject.CurrentUser.IsInAnyRole("Admin,ReleaseOfficial,ReadAll"))
+            {
+                using (Html.BeginForm(null, null, FormMethod.Post, new { id = "mainForm" }))
+                {
+                    <div class="pull-left col-md-4">
+                        @Html.BsDropDownListFor(x => x.ViewMode, Model.ViewModes(), new { onchange = "this.form.submit();" })
+                    </div>
+
+                    <div class="pull-left" style="margin-left: 5px;">@Html.CheckBoxFor(m => m.ShowPublished, new { onchange = "this.form.submit();" })</div>
+                    <div class="pull-left">@Html.Label("Include At OSTI", new { @class = "panel-title col-sm-3 text-nowrap" })</div>
+                }
+                <div class="pull-right">@Model.LastUpdate</div>
+            }
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body text-center">
+            @if (UserObject.CurrentUser.IsInAnyRole("Admin,ReleaseOfficial,ReadAll") && Model.HasData)
+            {
+                <div class="canvas-container" style="max-width: 300px; margin: 0 auto;">
+                    <canvas id="my-progress-chart" width="1" height="1"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <ul>
+                        <li><a style="color: black;" onclick="setViewMode('InProcess');"><div class="row lImported"></div>In Process / Needs Data (@Model.InProcess)</a></li>
+                        <li><a style="color: black;" onclick="setViewMode('PastDue');"><div class="row lApproved"></div>Past Due / Needs Data (@Model.PastDue)</a></li>
+                        <li><a style="color: black;" onclick="setViewMode('CompletedNeedsApproved');"><div class="row lCompletedNeedReview"></div>Completed / Needs Review Approved (@Model.CompletedNeedReview)</a></li>
+                        <li><a style="color: black;" onclick="setViewMode('CompletedNeedsPublished');"><div class="row lCompleted"></div>Completed / Needs Release (@Model.Completed)</a></li>
+                        <li><a style="color: black;" onclick="setViewMode('Published');"><div class="row lPublished"></div>At OSTI (@Model.Published)</a></li>
+                    </ul>
+                </div>
+            }
+            <div class="panel-body">
+                @(Html.Talon().Grid<SortMainObject>().Name("SortTable").Columns(c =>
+                    {
+                        c.Bound(x => x.SortMainId).Hidden();
+                        c.Bound(x => x.TitleStr).Width(175).Title("STI Number and Rev");
+                        c.Bound(x => x.PublishTitle).Title("Title");
+                        c.Bound(x => x.OwnerName).Title("Owner");
+                        c.Bound(x => x.StatusDisplayName).Title("Status");
+                        if (Model.ViewMode == ViewModeOptionEnum.CompletedNeedsPublished)
+                        {
+                            c.Bound(x => x.DelayToDateStr).Title("Delay To Date");
+                        }
+                        else
+                        {
+                            c.Bound(x => x.ReviewProgressStr).Title("Review Progress");
+                            c.Bound(x => x.DueDateStr).Title("Due Date");
+                        }
+                        c.Bound(x => x.GridButtons).Title(" ").Width(90).AlignCenter();
+                    }).AjaxSource(Url.Action("HomGridData", "Home", new { viewMode = Model.ViewMode }))
+                )
+            </div>
+        </div>
+    </div>
+    @if (UserObject.CurrentUser.IsInAnyRole("Admin,ReleaseOfficial,ReadAll") && Model.HasData)
+    {
+        <script>
+        $(function () {
+            var entryData = {
+                labels: [
+                    "In Process / Needs Data",
+                    "Past Due / Needs Data",
+                    "Completed / Needs Review Approved",
+                    "Completed / Need Release",
+                    "At OSTI"
+                ],
+                datasets: [
+                    {
+                        data: [@Model.InProcess, @Model.PastDue, @Model.CompletedNeedReview, @Model.Completed, @Model.Published],
+                        backgroundColor: [
+                            "#00ffcc",
+                            "#e00f0f",
+                            "#0a0aca",
+                            "#4ee00f",
+                            "#bfbfbf"
+                        ]
+                    }
+                ]
+            };
+
+            // And for a doughnut chart
+            var entryChart = new Chart($("#my-progress-chart"),
+                {
+                    type: 'doughnut',
+                    data: entryData,
+                    options: {
+                        animation: {
+                            animateScale: false,
+                            duration: 0
+                        },
+                        legend: {
+                            display: false
+                        },
+                        onClick: function (event, item) {
+                            if (item[0]) {
+                                onChartClick(item[0]["_index"]);
+                            }
+                        }
+                    }
+                });
+
+            function onChartClick(index) {
+                switch (index) {
+                case 0: // In Process / Needs Data
+                    setViewMode('InProcess');
+                    break;
+                case 1: // Past Due / Needs Data
+                    setViewMode('PastDue');
+                    break;
+                case 2: // Completed / Needs Review Approved
+                    setViewMode('CompletedNeedsApproved');
+                    break;
+                case 3: // Completed / Needs Published
+                    setViewMode('CompletedNeedsPublished');
+                    break;
+                case 4: // Published
+                    setViewMode('Published');
+                    break;
+                }
+            }
+
+
+        });
+        </script>
+    }
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var stab = $('#FailMessage').val();
+        if (stab != '') {
+            alert(stab);
+        }
+    });
+
+    function setViewMode(mode) {
+        $('#ViewMode').val(mode).trigger("change");
+    }
+</script>

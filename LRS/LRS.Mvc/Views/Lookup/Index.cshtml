@@ -1,0 +1,20 @@
+﻿@using LRS.Mvc.Classes
+
+@{
+    ViewBag.Title = "Lookup Data";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="list-group">
+        <a class="list-group-item" href="@Url.Action("Countries")">Countries</a>
+        <a class="list-group-item" href="@Url.Action("Languages")">Languages</a>
+        <a class="list-group-item" href="@Url.Action("DoeFundingCategories")">DOE Funding Category</a>
+        <a class="list-group-item" href="@Url.Action("FundingTypes")">Funding Types</a>
+        <a class="list-group-item" href="@Url.Action("SppFederalAgencies")">SPP Federal Agencies</a>
+        <a class="list-group-item" href="@Url.Action("GenericReviewData")">Review Generic Email Addresses</a>
+        <a class="list-group-item" href="@Url.Action("GenericReviewUsers")">Review Generic User Access</a>
+    </div>
+    </div>
+</div>

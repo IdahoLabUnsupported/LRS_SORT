@@ -1,0 +1,90 @@
+﻿@model LRS.Mvc.Models.AdminCommentsModel
+
+<div class="modal fade" id="dvAddAdminComment" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" onclick="ClearCommentData()">×</button>
+                <h4 class="modal-title" id="modalTitleAddComment">Add Comment</h4>
+            </div>
+            @using (Html.BeginForm("SaveAdminComment", "Artifact", FormMethod.Post, new { enctype = "multipart/form-data", id = "CommentForm", @onsubmit = "return false" }))
+            {
+                @Html.HiddenFor(m => m.MainId)
+                @Html.HiddenFor(m => m.AdminCommentId)
+                <div class="modal-body">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h3 class="panel-title">Comment Information</h3>
+                        </div>
+                        <div class="panel-body form-horizontal">
+                            <div class="row text-nowrap">
+                                <div class="col-md-12">
+                                    <label class="control-label col-sm-2" for="AdminComment"><b style="color:red;">* </b>Comment</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @Html.BsTextAreaFor(m => m.AdminComment, new { @class = "help" })
+                                    <label id="CommentMsg" hidden><b style="color:red;">Comment is required</b></label>
+                                </div>
+                            </div>
+                            
+                            @if (Model.IsReleaseOfficer)
+                            {
+                                <div class="row text-nowrap">
+                                    <div class="col-md-1">
+                                        @Html.BsCheckBoxFor(m => m.AdminOnly, "Only Admin can see Comment")
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.Hidden("AdminOnly", false)
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" value="@Model.MainId" class="save_comment_btn btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-default" onclick="ClearAdminCommentData()">Cancel</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.save_comment_btn').click(function () {
+            var comment = $("#AdminComment").val();
+            $("#CommentMsg").hide();
+
+            if (comment.trim() != '') {
+                var form = $('#CommentForm');
+
+                $.post(form.attr('action'), form.serialize(),
+                        function (data) {
+                            AfterAdminCommentSave();
+                        })
+                    .fail(function (response) { alert("Unable to Save the Comment.  Required fields missing or Invalid."); });
+            } else {
+                $("#CommentMsg").show();
+            }
+        });
+    });
+
+    function AfterAdminCommentSave() {
+        ClearAdminCommentData();
+        if ($.isFunction(window.LoadAdminCommentsPartial)) {
+            window.LoadAdminCommentsPartial($('#MainId').val());
+        }
+    }
+
+    function ClearAdminCommentData() {
+        $('#dvAddAdminComment').modal('hide');
+        $("#CommentMsg").hide();
+        $("#AdminOnly").prop('checked', false);
+        $("#AdminComment").val('');
+        $("#AdminCommentId").val('');
+    }
+</script>

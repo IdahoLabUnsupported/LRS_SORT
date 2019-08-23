@@ -1,0 +1,30 @@
+﻿@using LRS.Mvc.Classes
+@model List<LRS.Business.SppCategoryFederalAgencyObject>
+@{
+    ViewBag.Title = "SPP Category Federal Agencies";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <div class="pull-left">@ViewBag.Title</div>
+                <div class="pull-right">
+                    <a href="@Url.Action("EditSppFederalAgency")" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i></a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="panel-body panel-grid">
+            @(Html.Talon().Grid(Model).Name("SppAgencyTable").Columns(c =>
+                      {
+                          c.Bound(x => x.SppCategoryFederalAgencyId).Hidden();
+                          c.Bound(x => x.FederalAgency).Order().Title("Federal Agency").Href(Url.Action("EditSppFederalAgency", "Lookup", new { id = "{SppCategoryFederalAgencyId}" }));
+                          c.Bound(x => x.Active).Width(100);
+                      }))
+        </div>
+    </div>
+</div>

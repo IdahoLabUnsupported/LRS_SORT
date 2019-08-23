@@ -1,0 +1,72 @@
+﻿@model LRS.Mvc.Models.OutstandingReviewsModel
+@{
+    ViewBag.Title = "Outstanding Reviews";
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <div class="pull-left">Outstanding Reviews</div>
+            <div class="pull-right">
+                <button type="button" onclick="SendOutstandingEmails();" class="btn btn-xs btn-primary"><i class="fa fa-envelope"> Send Reminder Emails to Everyone</i></button>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div class="panel-body">
+            @Html.Talon().Grid(Model.Reviews).Name("ReviewsTable").Columns(c =>
+            {
+                c.Bound(m => m.ReviewId).Hidden();
+                c.Bound(m => m.MainDisplayTitle).Title("STI Number and Rev");
+                c.Bound(m => m.MainTitle).Title("Artifact Title");
+                c.Bound(m => m.ReviewerName).Title("Reviewer Name");
+                c.Bound(m => m.ReviewerTypeDisplayName).Title("Reviewer Type");
+                c.Bound(m => m.StatusDateStr).Title("Review Status Date");
+                c.Bound(m => m.LastEmailDateStr).Title("Last Email Date");
+                c.Buttons(b =>
+                {
+                    b.Button("SendIndividualEmail").Icon("envelope").Type("primary").Title("Send Reminder Email");
+                }).Width(20).AlignCenter();
+            })
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        if ('@TempData["Sent"]' == 'True' || '@TempData["Sent"]' == 'true') {
+            alert("Email(s) were successfully sent.");
+        }
+        if ('@TempData["Sent"]' == 'False' || '@TempData["Sent"]' == 'false') {
+            alert("Email(s) failed to send. Something went wrong on the server.");
+        }
+    });
+    
+    function SendOutstandingEmails() {
+        $.confirm({
+            title: 'Send Reminder Emails',
+            content: 'Are you sure you wish to send reminder emails to every active reviewer?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-default',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Admin/SendOutstandingEmails/";
+            }
+        });
+    }
+
+    function SendIndividualEmail(row) {
+        $.confirm({
+            title: 'Send Reminder Emails',
+            content: 'Are you sure you wish to send reminder emails to the ' + row['ReviewerTypeDisplayName'] +' reviewer?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-default',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                window.location.href = "/Admin/SendIndividualReminder/" + row['ReviewId'];
+            }
+        });
+    }
+
+</script>

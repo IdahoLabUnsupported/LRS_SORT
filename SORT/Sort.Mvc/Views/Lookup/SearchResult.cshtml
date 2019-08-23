@@ -1,0 +1,31 @@
+﻿@using Sort.Mvc.Classes
+@model Sort.Mvc.Models.SearchModel
+
+@{
+    ViewBag.Title = "Find Filter Results";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Search '@Model.SearchData' Results</h3>
+        </div>
+        <div class="panel-body">
+            @(Html.Talon().Grid(Model.Results).Name("ResultesTable").Columns(c =>
+                      {
+                          c.Bound(x => x.Id).Hidden();
+                          c.Bound(x => x.Uri).Hidden();
+                          c.Bound(x => x.Name).Title("STI Number and Rev").Href("{Uri}");
+                          c.Bound(x => x.Title);
+                          c.Bound(x => x.Status);
+                      }).PageSizes(new List<int>() { 10, 25, 50, 100, -1 }).PageSize(-1))
+        </div>
+        <div class="row">
+            <div class="form-group col-md-9" style="margin-left: 15px;">
+                <a href=@Model.ReturnUrl class="btn btn-primary">Back</a>
+            </div>
+        </div>
+    </div>
+</div>

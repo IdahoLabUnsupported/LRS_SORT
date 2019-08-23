@@ -1,0 +1,107 @@
+﻿@using Sort.Business
+@model Sort.Mvc.Models.MetadataModel
+
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Core Capabilities</b></p>
+    <p>Publication can be included in one or more Core Capabilities (CC) area.</p>
+    <p>For Journal, Conference Publications, Reports Associated with R&D project please identifying all the CCs that belong to these items.</p>
+</div>
+@using (Html.BeginForm("AddCoreCapabilities", "Artifact", FormMethod.Post, new { id = "CoreCapabilitiesForm", @onsubmit = "return false" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    @Html.Hidden("MetaDataId")
+    @Html.Hidden("MetaDataType", MetaDataTypeEnum.CoreCapabilities.ToString())
+
+    <div>
+        <div class="form-group col-md-12">
+            <div class="row text-nowrap">
+                <div class="col-md-12">@Html.BsLabelFor(m => m.CoreCapabilityId, new { @class = "required col-md-3" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-11">
+                    @Html.BsDropDownListFor(m => m.CoreCapabilityId, MemoryCache.CoreCapabilitiesList(), " --Select-- ")
+                    @Html.ValidationMessageFor(m => m.CoreCapabilityId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-1">
+                    <button type="button" onclick="AddCoreCapability()" class="btn btn-sm btn-success">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<div id="CoreCapabilityIdPartial">
+    @Html.Partial("Partials/_coreCapabilitiesList", Model.Metadata)
+</div>
+<script>
+    $(document).ready(function () {
+        CheckCoreCapabilityRequired();
+    });
+
+    function AddCoreCapability() {
+        var id = $('#Sort_MainId').val();
+        var sbid = $('#CoreCapabilityId').val();
+
+        if (id != '' && sbid != '') {
+            SetValidationMsg('CoreCapabilityId', '');
+            var form = $('#CoreCapabilitiesForm');
+            $('.nav-pills a[href=#coreCapabilitiesTab]').addClass('saving');
+
+            $.post(form.attr('action'), form.serialize(),
+                function (data) {
+                    if (data != null && data != '') {
+                        $("#CoreCapabilityIdPartial").html(data);
+                        CheckCoreCapabilityRequired();
+                        $("#CoreCapabilityId").find('option').attr("selected", false);
+                    } else {
+                        alert("Unable to Save the Core Capability.  Required fields missing or Invalid.");
+                    }
+                })
+                .fail(function (response) { SetValidationMsg('CoreCapabilityId', "Unable to Save the Core Capability.  Required fields missing or Invalid."); })
+                .always(function () { setTimeout(function () { $('.nav-pills a[href=#coreCapabilitiesTab]').removeClass('saving'); }, 500); });
+
+        } else if (sbid == '') {
+            SetValidationMsg('CoreCapabilityId', 'Core Capability is required');
+        }
+    }
+
+    function RemoveCoreCapability(row) {
+        $.confirm({
+            icon: 'fa fa-warning',
+            title: 'Remove Core Capability',
+            content: 'Are you sure you wish to remove this Core Capability?',
+            confirmButtonClass: 'btn-danger',
+            cancelButtonClass: 'btn-primary',
+            confirmButton: "Yes",
+            cancelButton: "No",
+            confirm: function () {
+                $('.nav-pills a[href=#coreCapabilitiesTab]').addClass('saving');
+                $.post("/Artifact/RemoveCoreCapabilities",
+                    {
+                        id: row['MetaDataId']
+                    },
+                    function(data) {
+                        $("#CoreCapabilityIdPartial").html(data);
+                        CheckCoreCapabilityRequired();
+                    }).fail(function (response) { alert("Unable to complete request.  Server returned an error."); })
+                    .always(function () { setTimeout(function () { $('.nav-pills a[href=#coreCapabilitiesTab]').removeClass('saving'); }, 500); });
+            }
+        });
+    }
+
+    function CheckCoreCapabilityRequired() {
+        //if ($('#CoreCapabilitiesTbl >tbody:last >tr').length > 0 &&
+        //    !$('#CoreCapabilitiesTbl >tbody:last >tr >td').hasClass('dataTables_empty')) {
+        //    $('.nav-pills a[href=#coreCapabilitiesTab]').removeClass('required');
+        //} else {
+        //    $('.nav-pills a[href=#coreCapabilitiesTab]').addClass('required');
+        //}
+        //if ($.isFunction(window.CheckForCompletion)) {
+        //    window.CheckForCompletion();
+        //}
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+</script>

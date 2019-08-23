@@ -1,0 +1,19 @@
+﻿@model List<LRS.Business.AttachmentObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("attachments").Columns(c =>
+    {
+        c.Bound(m => m.MainId).Hidden();
+        c.Bound(m => m.AttachmentId).Hidden();
+        c.Bound(m => m.FileName).Title("File Name").Sortable(false);
+        c.Bound(m => m.Note).Title("Comments/Description").Sortable(false);
+        c.Bound(m => m.NumberPages).Title("# Pages").Sortable(false);
+        c.Bound(m => m.Size).Title("File Size").Sortable(false);
+        c.Bound(m => m.UploadDate).Title("Date Attached").Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button().Icon("download").Type("primary").Title("Download").ToolTip("Download Attachment").Href(Url.Action("DownloadAttachment", "Artifact", new { id = "{AttachmentId}"}));
+            b.Button("RemoveAttachment").Icon("times").Type("danger").Title("Remove").ToolTip("Remove Attachment");
+        }).Width(185).AlignCenter().NoWrap();
+    }).Clean()
+</div>

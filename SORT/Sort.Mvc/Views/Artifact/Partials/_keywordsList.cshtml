@@ -1,0 +1,14 @@
+﻿@model List<Sort.Business.SortMetaDataObject>
+
+<div class="form-group col-md-12">
+    @Html.Talon().Grid(Model).Name("keywords").Columns(c =>
+    {
+        c.Bound(m => m.MetaDataId).Hidden();
+        c.Bound(m => m.MetaDataType).Hidden();
+        c.Bound(m => m.Data).Title("Keyword").Sortable(false);
+        c.Buttons(b =>
+        {
+            b.Button("RemoveKeyword").Icon("times").Type("danger").ToolTip("Remove Keyword");
+        }).Width(30).AlignCenter();
+    }).Clean()
+</div>

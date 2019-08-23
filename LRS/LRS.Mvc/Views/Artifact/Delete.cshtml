@@ -1,0 +1,38 @@
+﻿@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.DeleteModel
+
+@{
+    ViewBag.Title = "Delete Artifact " + Model.StiNumber;
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Artifact " + Model.StiNumber, Url.Action("Index", new { id = Model.MainId }))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-8">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">@ViewBag.Title</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.MainId)
+            <div class="panel-body form-horizontal">
+                <p>Please provide a reason/comment why you are deleting this Artifact</p>
+                <p><b>Warning: You will not be able to undo this delete.</b></p>
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.Reason)
+                    <div class="col-md-10">
+                        @Html.BsTextAreaFor(m => m.Reason)
+                        @Html.ValidationMessageFor(m => m.Reason)
+                    </div>
+                </div>
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-primary">Delete</button>
+
+                    <a href="@Url.Action("Index", new {id = @Model.MainId})" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

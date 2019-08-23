@@ -1,0 +1,120 @@
+@using Sort.Business
+@using Sort.EmployeeHelper
+@using Sort.Mvc.Classes
+@model Sort.Mvc.Models.EditUserModel
+@{
+    ViewBag.Title = "Edit User";
+    Breadcrumb.Add("Home", "/")
+        .Next("Users", Url.Action("Users", "Admin"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-7">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Add / Edit User</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.EmployeeId)
+                    <div class="col-md-10">
+                        @if (!string.IsNullOrWhiteSpace(Model.EmployeeId))
+                        {
+                            @Html.HiddenFor(m => m.EmployeeId)
+                            @Html.BsTextBoxFor(m => m.Name, new { @readonly = "readonly", @tabindex = "-1" })
+                        }
+                        else
+                        {
+                            @Html.EmployeeFor(m => m.EmployeeId, Url.Action("SearchEmployees", "Home"))
+                            @Html.ValidationMessageFor(m => m.EmployeeId)
+                        }
+                    </div>
+                </div>
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.Roles)
+                    <div class="col-md-10">
+                        @Html.BsMultipleChosenFor(m => m.Roles, BsHelper.GetEnumSelectList<UserRole>())
+                        @Html.ValidationMessageFor(m => m.Roles)
+                    </div>
+                </div>
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@Url.Action("Users")" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.Roles.Contains(UserRole.OrgManager.ToString()))
+{
+    <div class="col-md-5">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <div class="pull-left"><h3 class="panel-title">User Orgs</h3></div>
+                <div class="pull-right"><a href="@Url.Action("AddUserOrgs", new { id = Model.EmployeeId })" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add User Org</a></div>
+                <div class="clearfix"></div>
+            </div>
+            <div id="UserRoleDiv" class="panel-body form-horizontal">
+                @Html.Action("UserOrgsPartial", "Admin", new { id = Model.EmployeeId })
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script>
+        $(document).ready(function() {
+            $('#EmployeeId').change(function() {
+                if ($(this).val() != '') {
+                    $.ajax({
+                            url: "@Url.Action("GetCurrentRole", "Admin")",
+                            data: { id: $(this).val() }
+                        })
+                        .done(function(res) {
+                            $('#Role').val(res.Role);
+                        });
+                }
+            });
+        });
+
+
+        function RemoveUserOrg(row) {
+            $.confirm({
+                title: 'Remove User Organization',
+                content: 'Are you sure you wish to remove the Organization <b>' + row["Org"] + '</b> from the User?',
+                confirmButtonClass: 'btn-warning',
+                cancelButtonClass: 'btn-primary',
+                confirmButton: "Yes",
+                cancelButton: "No",
+                confirm: function () {
+                    $.post("@Url.Action("RemoveUserOrg", "Admin")", { id: row["UserOrgId"], user: row["EmployeeId"] })
+                        .done(function (data) {
+                            if (data != null) {
+                                $("#UserRoleDiv").html(data);
+                            }
+                        });
+                }
+            });
+        }
+
+        function LoadUserOrgsPartial() {
+            var employeeId = $('#EmployeeId').val();
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("UserOrgsPartial", "Admin")",
+                data: {
+                    id: employeeId
+                },
+                success: function (data) {
+                    if (data != null) {
+                        $("#UserRoleDiv").html(data);
+                    }
+                }
+            });
+        }
+    </script>
+}
+

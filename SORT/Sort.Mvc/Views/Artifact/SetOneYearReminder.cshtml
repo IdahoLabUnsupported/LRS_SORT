@@ -1,0 +1,43 @@
+﻿@using Sort.Mvc.Classes
+@model Sort.Mvc.Models.ReminderModel
+
+@{
+    ViewBag.Title = "Artifact Reminder " + Model.Title;
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+
+@using (Html.BeginForm("SetOneYearReminder", "Artifact", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+    <div class="col-md-8">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Artifact @Model.Title</h3>
+            </div>
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.Title, new {@class="col-md-3"})
+                    <div class="col-md-9">@Html.BsTextBoxFor(m => m.Title, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                </div>
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.PublishTitle, new { @class = "col-md-3" })
+                    <div class="col-md-9">@Html.BsTextBoxFor(m => m.PublishTitle, new { @readonly = "readonly", @tabindex = "-1", @placeholder = "No data available. Waiting for data input from User." })</div>
+                </div>
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.ReminderDate, new { @class = "col-md-3" })
+                    <div class="col-md-9">
+                        @Html.BsDatePickerFor(m => m.ReminderDate, new { @class = "check-required" }).ClearButton(true).TodayButton(true)
+                        @Html.ValidationMessageFor(m => m.ReminderDate, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-offset-3 col-md-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}

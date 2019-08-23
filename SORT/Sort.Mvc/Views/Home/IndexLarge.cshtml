@@ -1,0 +1,46 @@
+@using Sort.Business
+@model Sort.Mvc.Models.HomeModel
+@{
+    ViewBag.Title = "Home Page";
+}
+
+@Html.Hidden("FailMessage", TempData["FailMessage"])
+
+<div class="col-lg-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Artifacts</h3>
+        </div>
+        <div class="panel-body text-center">
+            <div class="panel-body">
+                @(Html.Talon().Grid<SortMainObject>().Name("SortTable").Columns(c =>
+                  {
+                      c.Bound(x => x.SortMainId).Hidden();
+                      c.Bound(x => x.TitleStr).Width(175).Title("STI Number and Rev");
+                      c.Bound(x => x.PublishTitle).Title("Title");
+                      c.Bound(x => x.OwnerName).Title("Owner");
+                      c.Bound(x => x.StatusDisplayName).Title("Status");
+                      c.Bound(x => x.ReviewProgressStr).Title("Review Progress");
+                      c.Bound(x => x.ReviewStatus).Title("Review Status");
+                      c.Bound(x => x.DueDateStr).Title("Due Date");
+                      c.Bound(x => x.GridButtons).Title(" ").Width(90).AlignCenter();
+                  }).AjaxSource(Url.Action("HomGridData", "Home", new { viewMode = Model.ViewMode }))
+                 )
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var stab = $('#FailMessage').val();
+        if (stab != '') {
+            alert(stab);
+        }
+    });
+
+    function setViewMode(mode) {
+        $('#ViewMode').val(mode).trigger("change");
+    }
+</script>

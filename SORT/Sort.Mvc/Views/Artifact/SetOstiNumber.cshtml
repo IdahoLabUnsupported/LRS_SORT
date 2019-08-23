@@ -1,0 +1,38 @@
+﻿@using Sort.Mvc.Classes
+@model Sort.Mvc.Models.SetOstiNumberModel
+
+@{
+    ViewBag.Title = "Set Artifact OSTI Number";
+    Breadcrumb.Add("Home", "/")
+        .Next("Artifact", Url.Action("Index", "Artifact", new {id = Model.SortMainId}))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-7">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">@ViewBag.Title</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.SortMainId)
+            <div class="panel-heading">
+                <p>Please enter the OSTI Number for artifact @Model.DisplayTitle.</p>
+            </div>
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    @Html.BsLabelFor(m => m.OstiId, new { @class = "text-nowrap" })
+                    <div class="col-md-10">
+                        @Html.BsTextBoxFor(m => m.OstiId, new {@Placeholder = ""})
+                        @Html.ValidationMessageFor(m => m.OstiId)
+                    </div>
+                </div>
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="@Url.Action("Index", "Artifact", new {id = Model.SortMainId})" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

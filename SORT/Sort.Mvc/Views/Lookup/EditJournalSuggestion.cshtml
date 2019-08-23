@@ -1,0 +1,44 @@
+﻿@using Sort.Mvc.Classes
+@model Sort.Business.JournalObject
+@{
+    ViewBag.Title = (Model.JournalId > 0 ? "Edit" : "Add") + " Journal Suggestion";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next("Journal Suggestions", Url.Action("JournalSuggestions", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel panel-heading">
+            <h3 class="panel-title">@ViewBag.Title</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.JournalId)
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Journal Name</label>
+                    <div class="col-md-9">
+                        @Html.BsTextBoxFor(m => m.JournalName)
+                        @Html.ValidationMessageFor(m => m.JournalName)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Active</label>
+                    <div class="col-md-1">
+                        @Html.BsCheckBoxFor(m => m.Active)
+                        @Html.ValidationMessageFor(m => m.Active)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="@Url.Action("JournalSuggestions")" class="btn btn-default">Cancel</a>
+                    </div>
+                </div>
+            </div>}
+    </div>
+</div>

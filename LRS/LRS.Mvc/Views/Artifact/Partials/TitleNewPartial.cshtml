@@ -1,0 +1,131 @@
+﻿@using LRS.Business
+@model MainObject
+
+<style>
+    fieldset {
+        border: 1px dotted black
+    }
+
+    legend {
+        padding: 0.2em 0.5em;
+        border: 1px solid black;
+        color: black;
+        font-size: 90%;
+        text-align: left;
+    }
+</style>
+
+@using (Html.BeginForm("TitleSave", "Artifact", FormMethod.Post, new { id = "TitleForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.MainId)
+
+    if (Model.MainId.HasValue)
+    {
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.StiNumber, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.StiNumber, new { @readonly = "readonly", @tabindex = "-1" })
+            </div>
+        </div>
+        <br />
+    }
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.Title, new { @class = "required col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.Title, new { @class = "check-required" })
+                @Html.ValidationMessageFor(m => m.Title, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-group">
+        <div class="row text-nowrap">
+            <div class="col-md-5">@Html.BsLabelFor(m => m.DocumentType, new { @class = "required col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-5">
+                @Html.BsDropDownListFor(m => m.DocumentType, Extensions.GetEnumSelectList<DocumentTypeEnum>(new [] { (Current.IsDoeUser ? "" : "DoeID"), (Current.IsHistorical ? "" : "Historical") }), " --Select-- ")
+                @Html.ValidationMessageFor(m => m.DocumentType, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+    <div id="JournalDiv" class="panel-group" hidden="hidden">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.JournalName, new { @class = "col-md-3" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.JournalName)
+            </div>
+        </div>
+    </div>
+
+    <div id="LimitedDiv" class="panel-group" hidden="hidden">
+        <div class="row text-nowrap">
+            <div class="col-md-8">@Html.BsLabelFor(m => m.LimitedExp, new { @class = "required col-md-12" })</div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.BsTextBoxFor(m => m.LimitedExp)
+            </div>
+        </div>
+    </div>
+
+    <button id="btnSave" type="submit" class="btn btn-primary" disabled="disabled">Save</button>
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#Title').keyup(function () {
+            CheckForSave();
+        });
+
+        $('#LimitedExp').keyup(function () {
+            CheckForSave();
+        });
+
+        $('#DocumentType').change(function () {
+            if ($('#DocumentType').val() == 'Journal') {
+                $('#JournalDiv').show();
+            } else {
+                $('#JournalDiv').hide();
+            }
+            if ($('#DocumentType').val() == 'Limited') {
+                $('#LimitedDiv').show();
+            } else {
+                $('#LimitedDiv').hide();
+            }
+            CheckForSave();
+        });
+
+    });
+
+
+    function CheckForSave() {
+        $('#btnSave').prop("disabled", true);
+        var title = $('#Title').val();
+        var docType = $('#DocumentType').val();
+
+
+        if (title != '' && docType != '') {
+            if (docType == 'Limited') {
+                if ($('#LimitedExp').val() != '') {
+                    $('#btnSave').prop("disabled", false);
+                }
+            } else {
+                $('#btnSave').prop("disabled", false);
+            }
+        }
+    }
+
+</script>

@@ -1,0 +1,72 @@
+﻿@using LRS.Business
+@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.GenericReviewUsersModel
+
+@{
+    ViewBag.Title = "Review Generic Users Access";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="panel-title">
+                <div class="pull-left">@ViewBag.Title</div>
+                @if (Model.ReviewerType.HasValue)
+                {
+                    <div class="pull-right">
+                        <a href="@Url.Action("EditGenericReviewUser", new { type = Model.ReviewerType.Value.ToString() })" class="btn btn-xs btn-primary"><i class="fa fa-plus"></i></a>
+                    </div>
+                }
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="panel-body list-group">
+            <div class="form-group">
+                <label class="control-label col-md-2" for="ReviewerType">Review Type</label>
+                <div class="col-md-5">
+                    @Html.BsDropDownListFor(m => m.ReviewerType, BsHelper.GetEnumSelectList<ReviewerTypeGenericEnum>(), "- select -", new { @class = "save-min-requirement" })
+                </div>
+            </div>
+            <div class="panel-grid">
+                @(Html.Talon().Grid(Model.Users).Name("UsersTable").Columns(c =>
+                  {
+                      c.Bound(x => x.GenericUserId).Hidden();
+                      c.Bound(x => x.ReviewerType).Hidden();
+                      c.Bound(x => x.Name).Href(Url.Action("EditGenericReviewUser", "Lookup", new { id = "{GenericUserId}", type = "{ReviewerType}" }));
+                      c.Bound(x => x.Email).Width(100);
+                      c.Buttons(b =>
+                      {
+                          b.Button("RemoveGenericUser").Icon("times").Type("danger").ToolTip("Remove User");
+                      }).Width(20).AlignCenter();
+                  }))
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $("#ReviewerType").change(function () {
+                window.location = '/Lookup/GenericReviewUsers?type=' + $('#ReviewerType').val();
+            });
+        });
+
+        function RemoveGenericUser(row) {
+            $.confirm({
+                title: 'Remove Review User',
+                content: 'Are you sure you wish to remove this user from the Generic User Access List?',
+                confirmButtonClass: 'btn-danger',
+                cancelButtonClass: 'btn-primary',
+                confirmButton: "Yes",
+                cancelButton: "No",
+                confirm: function () {
+                    window.location.href = "/Lookup/RemoveGenericReviewUser/" + row["GenericUserId"] + '?type=' + $('#ReviewerType').val();
+                }
+            });
+        }
+    </script>
+}

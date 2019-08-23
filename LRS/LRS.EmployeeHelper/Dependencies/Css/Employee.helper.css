@@ -1,0 +1,14 @@
+﻿
+.employee-wrap {
+    position: relative;
+}
+
+.employee-wrap .employee-badge {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 9px;
+    font-weight: bold;
+    color: #aaa;
+    text-align: right;
+}

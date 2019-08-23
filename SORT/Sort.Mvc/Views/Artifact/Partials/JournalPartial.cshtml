@@ -1,0 +1,113 @@
+﻿@using Sort.Business
+@model SortMainObject
+    
+<div style="border: black 1px dotted; padding: 5px 15px; margin-bottom: 15px;">
+    <p><b>Journal Article</b></p>
+    <p>Place enter information on the Journal where your Article was published in.</p>
+</div>
+
+@using (Html.BeginForm("JorunalSave", "Artifact", FormMethod.Post, new {id = "JournalForm"}))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.SortMainId)
+
+    <div class="row text-nowrap">
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalType, new {@class = "required col-md-3"})</div>
+        <div class="col-md-8">@Html.BsLabelFor(m => m.JournalName, new {@class = "required col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            @Html.BsDropDownListFor(m => m.JournalType, BsHelper.GetEnumSelectList<JournalTypeEnum>(), " --Select-- ", new { @class = "check-required" })
+        </div>
+        <div class="col-md-8">
+            @Html.BsTextBoxFor(m => m.JournalName, Url.Action("LocationSuggestionSearch", "LookUp"))
+        </div>
+    </div>
+    <br/>
+    <div class="row text-nowrap">
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalVolume, new {@class = "required col-md-3"})</div>
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalIssue, new {@class = "required col-md-3"})</div>
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalSerial, new {@class = "required col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            @Html.BsTextBoxFor(m => m.JournalVolume, new { @class = "check-required" })
+        </div>
+        <div class="col-md-4">
+            @Html.BsTextBoxFor(m => m.JournalIssue, new { @class = "check-required" })
+        </div>
+        <div class="col-md-4">
+            @Html.BsTextBoxFor(m => m.JournalSerial, new { @class = "check-required" })
+        </div>
+    </div>
+    <br/>
+    <div class="row text-nowrap">
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalStartPage, new {@class = "required col-md-3"})</div>
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalEndPage, new {@class = "required col-md-3"})</div>
+        <div class="col-md-4">@Html.BsLabelFor(m => m.JournalDoi, new {@class = "col-md-3"})</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            @Html.BsInputMaskFor(m => m.JournalStartPage, InputMaskFormat.Integer, new { @class = "check-required" })
+        </div>
+        <div class="col-md-4">
+            @Html.BsInputMaskFor(m => m.JournalEndPage, InputMaskFormat.Integer, new { @class = "check-required" })
+        </div>
+        <div class="col-md-4">
+            @Html.BsTextBoxFor(m => m.JournalDoi)
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#JournalForm .check-required').change(function () {
+            CheckJournalRequired();
+        });
+
+        $('#JournalName').change(function () {
+            CheckJournalRequired();
+        });
+
+        CheckJournalRequired();
+    });
+
+    //Function will go through all elements that have a check-required class
+    //It will see if all the data is present, if it is not it will add a required calls to the 
+    //pill label, otherwise it will remove the class from the pill label.
+    function CheckJournalRequired() {
+        var requirMeet = true;
+        $('#JournalForm .check-required').each(function (i, obj) {
+            if ($(this).val() == '') {
+                requirMeet = false;
+            }
+        });
+
+        if ($('#JournalName').val() == '') {
+            requirMeet = false;
+        }
+
+        if (requirMeet) {
+            $('.nav-pills a[href=#journalTab]').removeClass('required');
+        } else {
+            $('.nav-pills a[href=#journalTab]').addClass('required');
+        }
+
+        if ($.isFunction(window.CheckForCompletion)) {
+            window.CheckForCompletion();
+        }
+    }
+
+    function JournalSave() {
+        $('.nav-pills a[href=#journalTab]').addClass('saving');
+        var form = $('#JournalForm');
+
+        $.post(form.attr('action'), form.serialize())
+            .always(function () {
+                $('.nav-pills a[href=#journalTab]').removeClass('saving');
+            });
+    }
+</script>

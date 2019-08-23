@@ -1,0 +1,45 @@
+﻿@using Sort.Business
+@using Sort.Mvc.Classes
+@model Sort.Business.SppCategoryFederalAgencyObject
+@{
+    ViewBag.Title = (Model.SppCategoryFederalAgencyId > 0 ? "Edit" : "Add") + " SPP Federal Agency";
+    Breadcrumb.Add("Dashboard", "/")
+        .Next("Lookup Data", Url.Action("Index", "Lookup"))
+        .Next("SPP Federal Agencies", Url.Action("SppFederalAgencies", "Lookup"))
+        .Next(ViewBag.Title);
+}
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel panel-heading">
+            <h3 class="panel-title">@ViewBag.Title</h3>
+        </div>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.SppCategoryFederalAgencyId)
+            <div class="panel-body form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Federal Agency</label>
+                    <div class="col-md-9">
+                        @Html.BsTextBoxFor(m => m.FederalAgency)
+                        @Html.ValidationMessageFor(m => m.FederalAgency)
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Active</label>
+                    <div class="col-md-1">
+                        @Html.BsCheckBoxFor(m => m.Active)
+                        @Html.ValidationMessageFor(m => m.Active)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="@Url.Action("SppFederalAgencies")" class="btn btn-default">Cancel</a>
+                    </div>
+                </div>
+            </div>}
+    </div>
+</div>

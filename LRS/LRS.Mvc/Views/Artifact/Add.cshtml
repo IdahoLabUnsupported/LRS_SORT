@@ -1,0 +1,62 @@
+﻿@using LRS.Business
+@using LRS.Mvc.Classes
+@model LRS.Mvc.Models.ArtifactModel
+@{
+    ViewBag.Title = "Edit Artifact";
+    Breadcrumb.Add("Home", "/")
+        .Next(ViewBag.Title);
+}
+
+<style>
+    em.undefined-display {
+        display: none;
+    }
+
+    .nav-pills > li > a {
+        border-radius: 14px 0 14px 0;
+    }
+</style>
+
+@Html.HiddenFor(m => m.SelectedTab)
+
+<div class="col-md-12">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">Artifact @Model.Main.Title</h3>
+        </div>
+        <div class="panel-body">
+            @Html.HiddenFor(m => m.Main.MainId)
+            <div class="col-md-2 pnl">
+                <ul id="artifactTabs" class="nav nav-pills nav-stacked">
+                    <li role="presentation" data-savefunction="TitleSave" class="active"><a href="#titleTab" data-toggle="tab">Main Info</a></li>
+                </ul>
+            </div>
+
+            <div class="tab-content clearfix">
+                @*title*@
+                <div class="tab-pane fade in active" id="titleTab">
+                    <div class="col-md-10 pnl well">
+                        <div class="panel-body">
+                            @Html.Partial("Partials/TitleNewPartial", Model.Main)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        var stab = $('#SelectedTab').val();
+        if (stab != '') {
+            $('a[href="#' + stab + '"]').trigger('click');
+        }
+    });
+    
+    function SetValidationMsg(control, msg) {
+        $('[data-valmsg-for="' + control + '"]').html(msg);
+    }
+    
+</script>
